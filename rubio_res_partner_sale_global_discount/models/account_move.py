@@ -144,16 +144,20 @@ class AccountMove(models.Model):
         if product.property_account_income_id:
             return product.property_account_income_id
 
-        # Buscar cuenta de ingresos por defecto
-        account = self.env['ir.property']._get(
-            'property_account_income_categ_id',
-            'product.category'
-        )
+        # Buscar cuenta de ingresos por defecto de la categoría del producto
+        if product.categ_id and product.categ_id.property_account_income_categ_id:
+            return product.categ_id.property_account_income_categ_id
+
+        # Buscar cuenta de ingresos genérica
+        account = self.env['account.account'].search([
+            ('account_type', '=', 'income'),
+            ('company_id', '=', self.company_id.id)
+        ], limit=1)
 
         if not account:
-            # Buscar cuenta de ingresos genérica
+            # Si no encuentra cuenta de ingresos, buscar cualquier cuenta de tipo income_other
             account = self.env['account.account'].search([
-                ('account_type', '=', 'income'),
+                ('account_type', 'in', ['income_other', 'asset_receivable']),
                 ('company_id', '=', self.company_id.id)
             ], limit=1)
 

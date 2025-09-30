@@ -15,8 +15,7 @@ class AccountMove(models.Model):
 
     def action_apply_partner_global_discounts(self):
         """
-        Aplica los descuentos globales configurados en el cliente
-        utilizando la funcionalidad del módulo account_global_discount
+        Abre el wizard para aplicar los descuentos globales configurados en el cliente
         """
         self.ensure_one()
 
@@ -43,25 +42,17 @@ class AccountMove(models.Model):
         if not applicable_discounts:
             raise UserError('No hay descuentos aplicables para esta factura.')
 
-        # Limpiar descuentos anteriores del cliente
-        self._remove_partner_discount_lines()
-
-        # Aplicar cada descuento usando la funcionalidad estándar
-        total_discount_applied = 0
-        for discount in applicable_discounts:
-            discount_amount = self._apply_partner_discount(discount, base_amount)
-            total_discount_applied += discount_amount
-            base_amount -= discount_amount  # Reducir base para descuentos acumulativos
-
-        self.partner_global_discounts_applied = True
-
+        # Abrir el wizard
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': 'Éxito',
-                'message': f'Se han aplicado descuentos por {self.currency_id.symbol}{total_discount_applied:.2f}',
-                'type': 'success',
+            'type': 'ir.actions.act_window',
+            'name': 'Aplicar Descuentos del Cliente',
+            'res_model': 'apply.partner.discounts.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {
+                'default_account_move_id': self.id,
+                'active_model': 'account.move',
+                'active_id': self.id,
             }
         }
 

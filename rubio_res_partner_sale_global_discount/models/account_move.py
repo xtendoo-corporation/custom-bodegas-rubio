@@ -213,7 +213,14 @@ class AccountMove(models.Model):
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
+    # Campo para marcar líneas de descuento global
+    is_global_discount = fields.Boolean(
+        string='Es Descuento Global',
+        default=False,
+        help="Indica si esta línea es un descuento global aplicado desde el cliente"
+    )
+
     def _is_global_discount_line(self):
         """Verifica si la línea es de descuento global"""
-        return (hasattr(self, 'is_global_discount') and self.is_global_discount) or \
+        return self.is_global_discount or \
                (self.price_unit < 0 and 'Descuento' in (self.name or '') and self.product_id)

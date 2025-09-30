@@ -99,10 +99,16 @@ class AccountMove(models.Model):
         discount_product = self._get_global_discount_product()
         discount_account = self._get_global_discount_account(discount_product)
 
+        # Crear descripción con el porcentaje o valor del descuento
+        if discount_type == 'percentage':
+            description = f'Descuento Global - {discount_name} ({discount_value}%)'
+        else:  # fixed_amount
+            description = f'Descuento Global - {discount_name} ({self.currency_id.symbol}{discount_value})'
+
         line_vals = {
             'move_id': self.id,
             'product_id': discount_product.id,
-            'name': f'Descuento Global - {discount_name}',
+            'name': description,
             'quantity': 1,
             'price_unit': -discount_amount,
             'account_id': discount_account.id,

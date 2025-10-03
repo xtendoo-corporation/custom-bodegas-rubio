@@ -49,47 +49,42 @@ class ResPartnerDiscount(models.Model):
         help="Fecha hasta la cual el descuento es válido"
     )
 
-    minimum_amount = fields.Float(
-        string='Importe Mínimo',
-        default=0.0,
-        help="Importe mínimo del pedido/factura para aplicar el descuento"
-    )
-
-    apply_to = fields.Selection([
+    document_types = fields.Selection([
         ('all', 'Todos los Documentos'),
         ('quotation', 'Solo Presupuestos'),
-        ('sale_order', 'Solo Pedidos'),
+        ('sale_order', 'Solo Pedidos de Venta'),
         ('invoice', 'Solo Facturas')
-    ], string='Aplicar a', default='all')
+    ], string='Aplicar en', default='all', help="Tipo de documento donde aplicar el descuento")
 
-    notes = fields.Text(string='Notas')
+    min_amount = fields.Float(
+        string='Importe Mínimo',
+        default=0.0,
+        help="Importe mínimo del documento para aplicar el descuento"
+    )
 
-    @api.constrains('discount_value', 'discount_type')
+    max_amount = fields.Float(
+        string='Importe Máximo',
+        default=0.0,
+        help="Importe máximo del documento para aplicar el descuento (0 = sin límite)"
+    )
+
+    @api.constrains('discount_value')
     def _check_discount_value(self):
         for record in self:
-            if record.discount_type == 'percentage':
-                if record.discount_value < 0 or record.discount_value > 100:
-                    raise ValidationError(
-                        "El porcentaje de descuento debe estar entre 0 y 100."
-                    )
-            elif record.discount_type == 'fixed':
-                if record.discount_value < 0:
-                    raise ValidationError(
-                        "El importe fijo de descuento no puede ser negativo."
-                    )
+            if record.discount_type == 'percentage' and (record.discount_value < 0 or record.discount_value > 100):
+                raise ValidationError("El porcentaje de descuento debe estar entre 0 y 100.")
+            if record.discount_type == 'fixed' and record.discount_value < 0:
+                raise ValidationError("El importe fijo no puede ser negativo.")
 
     @api.constrains('date_start', 'date_end')
     def _check_dates(self):
         for record in self:
-            if record.date_start and record.date_end:
-                if record.date_start > record.date_end:
-                    raise ValidationError(
-                        "La fecha de inicio no puede ser posterior a la fecha de fin."
-                    )
+            if record.date_start and record.date_end and record.date_start > record.date_end:
+                raise ValidationError("La fecha de inicio no puede ser posterior a la fecha de fin.")
 
     def is_applicable(self, document_type, amount, date=None):
         """
-        Verifica si el descuento es aplicable según los criterios configurados
+        Verifica si el descuento es aplicable para el tipo de documento, importe y fecha dados
         """
         self.ensure_one()
 
@@ -97,31 +92,36 @@ class ResPartnerDiscount(models.Model):
         if not self.active:
             return False
 
-        # Verificar fechas
-        current_date = date or fields.Date.today()
-        if self.date_start and current_date < self.date_start:
-            return False
-        if self.date_end and current_date > self.date_end:
+        # Verificar tipo de documento
+        if self.document_types != 'all' and self.document_types != document_type:
             return False
 
         # Verificar importe mínimo
-        if amount < self.minimum_amount:
+        if self.min_amount > 0 and amount < self.min_amount:
             return False
 
-        # Verificar tipo de documento
-        if self.apply_to != 'all':
-            if self.apply_to != document_type:
+        # Verificar importe máximo
+        if self.max_amount > 0 and amount > self.max_amount:
+            return False
+
+        # Verificar fechas
+        if date:
+            if self.date_start and date < self.date_start:
+                return False
+            if self.date_end and date > self.date_end:
                 return False
 
         return True
 
     def calculate_discount_amount(self, base_amount):
         """
-        Calcula el importe de descuento basado en el tipo y valor configurado
+        Calcula el importe del descuento basado en el importe base
         """
         self.ensure_one()
 
         if self.discount_type == 'percentage':
-            return base_amount * (self.discount_value / 100.0)
-        else:  # fixed
-            return min(self.discount_value, base_amount)
+            return base_amount * (self.discount_value / 100)
+        elif self.discount_type == 'fixed':
+            return min(self.discount_value, base_amount)  # No puede ser mayor al importe base
+
+        return 0.0

@@ -17,23 +17,40 @@ class ResPartner(models.Model):
         store=True
     )
 
-    @api.depends('global_discount_ids', 'global_discount_ids.active')
+    @api.depends('global_discount_ids', 'global_discount_ids.active', 'parent_id', 'parent_id.global_discount_ids', 'parent_id.global_discount_ids.active')
     def _compute_has_global_discounts(self):
         for partner in self:
-            partner.has_global_discounts = bool(
-                partner.global_discount_ids.filtered('active')
-            )
+            # Verificar descuentos propios
+            own_discounts = bool(partner.global_discount_ids.filtered('active'))
+
+            # Verificar descuentos del padre si existe
+            parent_discounts = False
+            if partner.parent_id:
+                parent_discounts = bool(partner.parent_id.global_discount_ids.filtered('active'))
+
+            partner.has_global_discounts = own_discounts or parent_discounts
 
     def get_applicable_discounts(self, document_type, amount, date=None):
         """
         Obtiene los descuentos aplicables para un tipo de documento y importe
+        Incluye descuentos propios y del contacto padre si existe
         """
         self.ensure_one()
         applicable_discounts = []
 
+        # Obtener descuentos propios
         for discount in self.global_discount_ids.filtered('active'):
             if discount.is_applicable(document_type, amount, date):
                 applicable_discounts.append(discount)
+
+        # Obtener descuentos del contacto padre si existe
+        if self.parent_id:
+            for discount in self.parent_id.global_discount_ids.filtered('active'):
+                if discount.is_applicable(document_type, amount, date):
+                    applicable_discounts.append(discount)
+
+        # Ordenar por secuencia para aplicación correcta
+        applicable_discounts.sort(key=lambda d: d.sequence if hasattr(d, 'sequence') else 0)
 
         return applicable_discounts
 

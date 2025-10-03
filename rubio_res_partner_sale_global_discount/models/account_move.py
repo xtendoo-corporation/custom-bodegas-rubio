@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
+from collections import defaultdict
+from odoo.tools import float_repr
 
 
 class AccountMove(models.Model):
@@ -72,24 +74,102 @@ class AccountMove(models.Model):
 
     def _apply_partner_discount(self, discount_config, base_amount):
         """
-        Aplica un descuento individual usando la funcionalidad del módulo account_global_discount
+        Aplica un descuento individual creando líneas por cada grupo de impuestos
+        Similar al método _create_discount_lines de Odoo estándar
         """
-        discount_amount = discount_config.calculate_discount_amount(base_amount)
+        # Agrupar líneas por tipo de impuesto
+        total_price_per_tax_groups = defaultdict(float)
 
-        if discount_amount > 0:
-            # Crear la línea de descuento global usando el método estándar
-            self._create_global_discount_line(
-                discount_config.name,
-                discount_amount,
-                discount_config.discount_type,
-                discount_config.discount_value
-            )
+        for line in self.invoice_line_ids:
+            # Excluir líneas de descuento, sección y nota
+            if self._is_line_global_discount(line) or line.display_type in ['line_section', 'line_note']:
+                continue
 
-        return discount_amount
+            if not line.quantity or not line.price_unit:
+                continue
+
+            # Excluir impuestos fijos que no se pueden descontar
+            taxes = line.tax_ids.flatten_taxes_hierarchy()
+            fixed_taxes = taxes.filtered(lambda t: t.amount_type == 'fixed')
+            taxes -= fixed_taxes
+
+            # Calcular el precio total de la línea considerando el descuento de línea
+            line_price = line.price_unit * (1 - (line.discount or 0.0) / 100) * line.quantity
+            total_price_per_tax_groups[taxes] += line_price
+
+        if not total_price_per_tax_groups:
+            # No hay líneas válidas para aplicar el descuento
+            return 0
+
+        # Calcular el porcentaje de descuento basado en el importe base
+        if discount_config.discount_type == 'percentage':
+            discount_percentage = discount_config.discount_value / 100.0
+        else:  # fixed_amount
+            # Convertir importe fijo a porcentaje basado en el total
+            total_base = sum(total_price_per_tax_groups.values())
+            discount_percentage = discount_config.discount_value / total_base if total_base > 0 else 0
+
+        total_discount_applied = 0
+        discount_dp = self.env['decimal.precision'].precision_get('Discount')
+
+        # Crear líneas de descuento por cada grupo de impuestos
+        if len(total_price_per_tax_groups) == 1:
+            # Un solo grupo de impuestos o sin impuestos
+            taxes = next(iter(total_price_per_tax_groups.keys()))
+            subtotal = total_price_per_tax_groups[taxes]
+            discount_amount = subtotal * discount_percentage
+
+            if discount_amount > 0:
+                description = f"Descuento Global - {discount_config.name} ({float_repr(discount_percentage * 100, discount_dp)}%)"
+                self._create_single_discount_line(
+                    discount_name=description,
+                    discount_amount=discount_amount,
+                    taxes=taxes
+                )
+                total_discount_applied += discount_amount
+        else:
+            # Múltiples grupos de impuestos - crear una línea por cada uno
+            for taxes, subtotal in total_price_per_tax_groups.items():
+                discount_amount = subtotal * discount_percentage
+
+                if discount_amount > 0:
+                    description = f"Descuento Global - {discount_config.name} ({float_repr(discount_percentage * 100, discount_dp)}%)"
+
+                    self._create_single_discount_line(
+                        discount_name=description,
+                        discount_amount=discount_amount,
+                        taxes=taxes
+                    )
+                    total_discount_applied += discount_amount
+
+        return total_discount_applied
+
+    def _create_single_discount_line(self, discount_name, discount_amount, taxes):
+        """
+        Crea una única línea de descuento con los impuestos especificados
+        """
+        discount_product = self._get_global_discount_product()
+        discount_account = self._get_global_discount_account(discount_product)
+
+        line_vals = {
+            'move_id': self.id,
+            'product_id': discount_product.id,
+            'name': discount_name,
+            'quantity': 1,
+            'price_unit': -discount_amount,
+            'account_id': discount_account.id,
+            'tax_ids': [(6, 0, taxes.ids)] if taxes else False,
+            'is_global_discount': True,
+            'sequence': 999,  # Al final de la factura
+        }
+
+        # Crear la línea de descuento
+        self.env['account.move.line'].create(line_vals)
 
     def _create_global_discount_line(self, discount_name, discount_amount, discount_type, discount_value):
         """
         Crea una línea de descuento global usando la funcionalidad estándar
+        DEPRECATED: Usar _apply_partner_discount que crea líneas por grupo de impuestos
         """
         # Si el módulo account_global_discount tiene un método específico, lo usamos
         if hasattr(self, '_add_global_discount_line'):

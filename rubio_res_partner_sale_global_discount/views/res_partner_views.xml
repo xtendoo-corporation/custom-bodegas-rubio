@@ -23,11 +23,11 @@
                         <group>
                             <field name="date_start"/>
                             <field name="date_end"/>
-                            <field name="minimum_amount"/>
-                            <field name="apply_to"/>
+                            <field name="document_types"/>
+                            <field name="min_amount"/>
+                            <field name="max_amount"/>
                         </group>
                     </group>
-                    <field name="notes" placeholder="Notas adicionales..."/>
                 </sheet>
             </form>
         </field>
@@ -45,8 +45,8 @@
                 <field name="discount_value"/>
                 <field name="date_start"/>
                 <field name="date_end"/>
-                <field name="minimum_amount"/>
-                <field name="apply_to"/>
+                <field name="document_types"/>
+                <field name="min_amount"/>
                 <field name="active"/>
             </list>
         </field>
@@ -68,8 +68,8 @@
                             <field name="discount_value"/>
                             <field name="date_start"/>
                             <field name="date_end"/>
-                            <field name="minimum_amount"/>
-                            <field name="apply_to"/>
+                            <field name="document_types"/>
+                            <field name="min_amount"/>
                             <field name="active"/>
                         </list>
                         <form>
@@ -84,11 +84,11 @@
                                 <group>
                                     <field name="date_start"/>
                                     <field name="date_end"/>
-                                    <field name="minimum_amount"/>
-                                    <field name="apply_to"/>
+                                    <field name="document_types"/>
+                                    <field name="min_amount"/>
+                                    <field name="max_amount"/>
                                 </group>
                             </group>
-                            <field name="notes" placeholder="Notas adicionales..."/>
                         </form>
                     </field>
                 </page>

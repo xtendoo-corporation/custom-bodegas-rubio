@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Secuencia Silíce para albaranes -->
+    <record id="seq_stock_picking_silice" model="ir.sequence">
+        <field name="name">Secuencia Silíce para albaranes</field>
+        <field name="code">rubio.stock.picking.silice</field>
+        <field name="prefix">SIL/%(year)s/</field>
+        <field name="padding">5</field>
+        <field name="company_id" eval="False"/>
+        <field name="implementation">no_gap</field>
+        <field name="number_increment">1</field>
+        <field name="number_next">1</field>
+    </record>
+
+</odoo>
+

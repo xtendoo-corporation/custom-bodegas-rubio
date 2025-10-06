@@ -1,0 +1,42 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+#	* rubio_stock_picking_silice_sequence
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-10-06 12:00:00+0000\n"
+"PO-Revision-Date: 2025-10-06 12:00:00+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#. module: rubio_stock_picking_silice_sequence
+#: model:ir.model.fields,field_description:rubio_stock_picking_silice_sequence.field_stock_picking__silice_sequence
+msgid "Secuencia Silíce"
+msgstr "Silíce Sequence"
+
+#. module: rubio_stock_picking_silice_sequence
+#: model:ir.model.fields,help:rubio_stock_picking_silice_sequence.field_stock_picking__silice_sequence
+msgid "Número de secuencia Silíce asignado automáticamente al validar el albarán"
+msgstr "Silíce sequence number automatically assigned when validating the picking"
+
+#. module: rubio_stock_picking_silice_sequence
+#: model:ir.sequence,name:rubio_stock_picking_silice_sequence.seq_stock_picking_silice
+msgid "Secuencia Silíce para albaranes"
+msgstr "Silíce Sequence for Pickings"
+
+#. module: rubio_stock_picking_silice_sequence
+#: model:ir.module.module,name:rubio_stock_picking_silice_sequence.module_rubio_stock_picking_silice_sequence
+msgid "Silíce: Secuencia para albaranes"
+msgstr "Silíce: Sequence for Pickings"
+
+#. module: rubio_stock_picking_silice_sequence
+#: model:ir.module.module,summary:rubio_stock_picking_silice_sequence.module_rubio_stock_picking_silice_sequence
+msgid "Añade secuencia personalizada Silíce a albaranes sin modificar la secuencia estándar"
+msgstr "Adds custom Silíce sequence to pickings without modifying the standard sequence"

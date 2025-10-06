@@ -1,28 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-
-    <!-- Vista formulario de stock.picking con campo silice_sequence -->
-    <record id="view_picking_form_silice_sequence" model="ir.ui.view">
-        <field name="name">stock.picking.form.silice.sequence</field>
+    <record id="view_picking_form_inherit_silice" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.silice</field>
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
-            <field name="name" position="after">
-                <field name="silice_sequence" readonly="1"/>
-            </field>
+            <xpath expr="//field[@name='picking_type_id']" position="after">
+                <field name="silice_sequence" string="Silice: " invisible="picking_type_code != 'outgoing'"/>
+            </xpath>
         </field>
     </record>
-
-    <!-- Vista árbol de stock.picking con campo silice_sequence -->
-    <record id="view_picking_tree_silice_sequence" model="ir.ui.view">
-        <field name="name">stock.picking.tree.silice.sequence</field>
-        <field name="model">stock.picking</field>
-        <field name="inherit_id" ref="stock.vpicktree"/>
-        <field name="arch" type="xml">
-            <field name="name" position="after">
-                <field name="silice_sequence" optional="show"/>
-            </field>
-        </field>
-    </record>
-
 </odoo>

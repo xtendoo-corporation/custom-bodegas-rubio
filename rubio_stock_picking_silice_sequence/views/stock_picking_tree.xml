@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="stock_picking_tree_view_silice" model="ir.ui.view">
+        <field name="name">stock.picking.tree.silice</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="silice_sequence" string="Silice" width="140"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

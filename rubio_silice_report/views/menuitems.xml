@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Menú principal SILICIE -->
+    <menuitem id="menu_silicie_root"
+              name="SILICIE"
+              parent="stock.menu_stock_warehouse_mgmt"
+              sequence="100"/>
+
+    <!-- Submenú: Exportar entregas -->
+    <menuitem id="menu_silicie_export_deliveries"
+              name="Exportar Entregas (CSV)"
+              parent="menu_silicie_root"
+              action="action_silice_report_wizard"
+              sequence="10"/>
+
+</odoo>
+

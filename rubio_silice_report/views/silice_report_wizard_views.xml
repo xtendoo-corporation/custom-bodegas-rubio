@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vista formulario del wizard -->
+    <record id="silice_report_wizard_view_form" model="ir.ui.view">
+        <field name="name">silice.report.wizard.view.form</field>
+        <field name="model">silice.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Exportar Entregas SILICIE 2.0">
+                <sheet>
+                    <group>
+                        <group string="Rango de Fechas">
+                            <field name="date_start" required="1"/>
+                            <field name="date_end" required="1"/>
+                            <field name="include_not_done"/>
+                        </group>
+                        <group string="Parámetros SILICIE">
+                            <field name="csv_profile" required="1"/>
+                            <field name="movement_type" required="1"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Información" name="info">
+                            <group>
+                                <div class="alert alert-info" role="alert">
+                                    <h4 class="alert-heading">Exportación CSV SILICIE 2.0</h4>
+                                    <p>
+                                        Este asistente genera un CSV de exportación conforme a SILICIE 2.0
+                                        con los pickings de tipo Entregas (outgoing) en el rango de fechas seleccionado.
+                                    </p>
+                                    <hr/>
+                                    <p class="mb-0">
+                                        <strong>Requisitos previos:</strong>
+                                    </p>
+                                    <ul>
+                                        <li>Configurar CAE y perfil CSV en Ajustes → Inventario → SILICIE</li>
+                                        <li>Configurar mapeo de productos en formato JSON</li>
+                                        <li>Los pickings deben tener número de sílice asignado</li>
+                                    </ul>
+                                </div>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button name="action_export_csv" string="Exportar CSV SILICIE" type="object" class="btn-primary"/>
+                    <button string="Cancelar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+</odoo>
+

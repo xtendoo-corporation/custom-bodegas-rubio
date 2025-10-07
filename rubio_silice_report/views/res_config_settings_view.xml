@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Vista de configuración SILICIE -->
+    <record id="res_config_settings_view_form" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.silicie</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="stock.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//app[@name='stock']" position="after">
+                <app string="SILICIE 2.0" name="rubio_silice_report">
+                    <block title="Configuración SILICIE 2.0">
+                        <setting>
+                            <field name="silicie_cae" required="1"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Código de Actividad Empresarial del establecimiento SILICIE (máx. 16 caracteres)
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting>
+                            <field name="silicie_establishment_type"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Tipo de establecimiento según tablas SILICIE (FA, DE, EX, IM, DT, OP, RE)
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting>
+                            <field name="silicie_group"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Grupo impositivo para determinar el perfil de fichero
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting>
+                            <field name="silicie_csv_profile"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Perfil SILICIE 2.0: IESH1CSV (Hidrocarburos), IEST1CSV (Tabaco), IESA1CSV (Alcohol)
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting>
+                            <field name="silicie_date_tz" placeholder="Europe/Madrid"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Zona horaria para formateo de fechas
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting>
+                            <field name="silice_field_name" placeholder="x_silice_number"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Nombre del campo en stock.picking que contiene el número de sílice
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting>
+                            <field name="silicie_default_um"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Unidad de medida estandarizada SILICIE para cantidades
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting>
+                            <field name="silicie_default_movement_type"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Tipo de movimiento SILICIE por defecto (A08, A10, A11...)
+                                </div>
+                            </div>
+                        </setting>
+
+                        <setting string="Mapeo de Productos (JSON)">
+                            <field name="silicie_product_mapping_json" widget="text" placeholder="{}"/>
+                            <div class="content-group">
+                                <div class="text-muted">
+                                    Mapeo desde productos Odoo → identificación producto SILICIE
+                                    <br/>
+                                    Formato JSON: {"product_id": {"codigo_producto": "X", "tipo_producto": "Y", "unidad_medida": "LTS", ...}}
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

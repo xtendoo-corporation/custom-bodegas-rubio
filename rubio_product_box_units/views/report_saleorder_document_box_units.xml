@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2025 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <template id="report_saleorder_document_box_units" inherit_id="sale.report_saleorder_document">
+        <!-- Reemplazar el encabezado por el orden correcto -->
+        <xpath expr="//table[@class='o_has_total_table table o_main_table table-borderless']//thead/tr" position="replace">
+            <tr>
+                <th name="th_description" class="text-start">Descripción</th>
+                <th name="th_boxes" class="text-end">Cajas</th>
+                <th name="th_box_units" class="text-end">Ud/Caja</th>
+                <th name="th_quantity" class="text-end text-nowrap">Cantidad</th>
+                <th name="th_priceunit" class="text-end text-nowrap">Precio</th>
+                <th name="th_discount" t-if="display_discount" class="text-end">Desc.%</th>
+                <th name="th_taxes" class="text-end">IVA</th>
+                <th name="th_subtotal" class="text-end">Importe</th>
+            </tr>
+        </xpath>
+
+        <!-- Añadir td_boxes y td_box_units antes de td_quantity -->
+        <xpath expr="//td[@name='td_quantity']" position="before">
+            <td name="td_boxes" class="o_td_boxes text-end">
+                <span t-field="line.boxes" class="text-nowrap">1.00</span>
+            </td>
+            <td name="td_box_units" class="o_td_box_units text-end">
+                <span t-field="line.box_units" class="text-nowrap">3.00</span>
+            </td>
+        </xpath>
+
+        <!-- Reemplazar td_quantity para mantener el orden -->
+        <xpath expr="//td[@name='td_quantity']" position="replace">
+            <td name="td_quantity" class="o_td_quantity text-end">
+                <span t-field="line.product_uom_qty" class="text-nowrap">3</span>
+                <span t-if="line.product_packaging_id">
+                    (<span t-field="line.product_packaging_qty" t-options='{"widget": "integer"}'/> <span t-field="line.product_packaging_id"/>)
+                </span>
+            </td>
+        </xpath>
+
+        <!-- Ajustar el colspan para secciones y notas (ahora son 8 columnas en total) -->
+        <xpath expr="//td[@name='td_section_line']" position="attributes">
+            <attribute name="colspan">8</attribute>
+        </xpath>
+
+        <xpath expr="//td[@name='td_note_line']" position="attributes">
+            <attribute name="colspan">8</attribute>
+        </xpath>
+
+        <xpath expr="//td[@name='td_section_subtotal']" position="attributes">
+            <attribute name="colspan">8</attribute>
+        </xpath>
+
+        <!-- Eliminar barra negra encima de Base Imponible y añadir separación -->
+        <xpath expr="//div[@id='total']" position="before">
+            <style>
+                /* Quitar barra negra encima de Base Imponible */
+                .o_total_table tr:first-child td {
+                    border-top: none !important;
+                }
+                .o_total_table tr:first-child th {
+                    border-top: none !important;
+                }
+                /* Añadir separación entre tabla principal y totales */
+                #total {
+                    margin-top: 40px !important;
+                }
+                /* Eliminar cualquier borde superior en la sección de totales */
+                .o_total_table {
+                    border-top: none !important;
+                }
+                .o_total_table tbody tr:first-child {
+                    border-top: none !important;
+                }
+            </style>
+        </xpath>
+    </template>
+</odoo>

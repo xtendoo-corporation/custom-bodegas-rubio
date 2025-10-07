@@ -1,0 +1,32 @@
+<odoo>
+    <template id="report_invoice_document_box_units" inherit_id="account.report_invoice_document">
+        <!-- Reemplazar el encabezado por el orden correcto -->
+        <xpath expr="//table[1]/thead/tr" position="replace">
+            <tr>
+                <th>Producto</th>
+                <th>Cajas</th>
+                <th>Ud/Caja</th>
+                <th>Cantidad</th>
+                <th>Precio</th>
+                <th>IVA</th>
+                <th>Importe</th>
+            </tr>
+        </xpath>
+        <!-- Reemplazar cada fila de datos por el orden correcto -->
+<!--        haz un xpath al td con name td_quantity-->
+        <xpath expr="//td[@name='td_quantity']" position="before">
+            <!-- Mover td_boxes y td_box_units antes de td_quantity -->
+            <td name="td_boxes" class="o_td_boxes text-end">
+                <span t-field="line.boxes" class="text-nowrap">1.00</span>
+            </td>
+            <td name="td_box_units" class="o_td_box_units text-end">
+                <span t-field="line.box_units" class="text-nowrap">3.00</span>
+            </td>
+        </xpath>
+        <xpath expr="//td[@name='td_quantity']" position="replace">
+            <td name="td_quantity" class="text-end">
+                <span t-field="line.quantity" class="text-nowrap">3.00</span>
+            </td>
+        </xpath>
+    </template>
+</odoo>

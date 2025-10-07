@@ -11,6 +11,7 @@
         "security/ir.model.access.csv",
         "data/actions.xml",
         "views/res_config_settings_view.xml",
+        "views/product_template_views.xml",
         "views/silice_report_wizard_views.xml",
         "views/menuitems.xml",
     ],

@@ -175,20 +175,23 @@ class SiliceReportWizard(models.TransientModel):
         return movement_type
 
     def _get_product_mapping(self, product_id):
-        """Obtiene el mapeo SILICIE del producto desde configuración JSON."""
-        ICP = self.env['ir.config_parameter'].sudo()
-        mapping_json = ICP.get_param('rubio_silice_report.silicie_product_mapping_json', '{}')
+        """Obtiene los datos SILICIE del producto directamente desde sus campos."""
+        product = self.env['product.product'].browse(product_id)
 
-        try:
-            mapping = json.loads(mapping_json)
-        except json.JSONDecodeError:
-            mapping = {}
-
-        product_key = str(product_id)
-        if product_key not in mapping:
+        # Si no tiene configuración SILICIE, retornar None
+        if not product.silicie_codigo_producto or not product.silicie_tipo_producto:
             return None
 
-        return mapping[product_key]
+        return {
+            'codigo_producto': product.silicie_codigo_producto,
+            'tipo_producto': product.silicie_tipo_producto,
+            'unidad_medida': product.silicie_unidad_medida or 'UN',
+            'graduacion': str(product.silicie_graduacion) if product.silicie_graduacion else '',
+            'marca_comercial': product.silicie_marca_comercial or '',
+            'precio_venta': str(product.silicie_precio_venta) if product.silicie_precio_venta else '',
+            'densidad': str(product.silicie_densidad) if product.silicie_densidad else '',
+            'temperatura': str(product.silicie_temperatura) if product.silicie_temperatura else '',
+        }
 
     def _build_csv_rows(self, pickings):
         """Construye las filas CSV desde los pickings."""
@@ -229,7 +232,7 @@ class SiliceReportWizard(models.TransientModel):
             tipo_justificante = 'AL'  # Albarán por defecto
 
             # Procesar líneas de movimiento
-            for move_line in picking.move_line_ids.filtered(lambda ml: ml.qty_done > 0):
+            for move_line in picking.move_line_ids.filtered(lambda ml: ml.quantity > 0):
                 product = move_line.product_id
 
                 # Obtener mapeo del producto
@@ -249,7 +252,8 @@ class SiliceReportWizard(models.TransientModel):
                     'tipo_movimiento': movement_type,
                     'codigo_producto': product_mapping.get('codigo_producto', ''),
                     'tipo_producto': product_mapping.get('tipo_producto', ''),
-                    'cantidad': move_line.qty_done,
+                    #'cantidad': move_line.qty_done,
+                    'cantidad': move_line.quantity,
                     'unidad_medida': product_mapping.get('unidad_medida', default_um),
                     'destino_nif': destino_nif,
                     'destino_nombre': destino_nombre,
@@ -274,8 +278,9 @@ class SiliceReportWizard(models.TransientModel):
 
         if missing_products:
             raise UserError(_(
-                'Los siguientes productos no tienen mapeo SILICIE configurado:\n\n%s\n\n'
-                'Configure el mapeo en: Ajustes → Inventario → SILICIE → Mapeo de Productos'
+                'Los siguientes productos no tienen configuración SILICIE completa:\n\n%s\n\n'
+                'Configure los campos SILICIE directamente en cada producto:\n'
+                'Inventario → Productos → [Producto] → Pestaña "SILICIE"'
             ) % '\n'.join(sorted(missing_products)))
 
         return rows_data
@@ -365,4 +370,3 @@ class SiliceReportWizard(models.TransientModel):
             'url': f'/web/content/{attachment.id}?download=true',
             'target': 'self',
         }
-

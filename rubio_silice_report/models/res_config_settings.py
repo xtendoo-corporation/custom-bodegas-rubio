@@ -61,7 +61,7 @@ class ResConfigSettings(models.TransientModel):
         default='LTS',
     )
 
-    silicie_product_mapping_json = fields.Text(
+    silicie_product_mapping_json = fields.Char(
         string='Mapeo de Productos (JSON)',
         help='Mapeo desde productos Odoo → identificación producto SILICIE\n'
              'Formato: {"product_id": {"codigo_producto": "X", "tipo_producto": "Y", ...}}',
@@ -76,4 +76,3 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='rubio_silice_report.silicie_default_movement_type',
         default='A08',
     )
-

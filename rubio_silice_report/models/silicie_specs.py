@@ -398,18 +398,25 @@ def get_profile_choices():
     """Retorna las opciones de perfiles para un campo Selection."""
     return [(key, val['name']) for key, val in SILICIE_PROFILES.items()]
 
-
 def get_establishment_type_choices():
-    """Retorna las opciones de tipos de establecimiento."""
+    """Retorna las opciones de tipos de establecimiento para un campo Selection."""
     return [(key, val) for key, val in ESTABLISHMENT_TYPES.items()]
 
-
 def get_movement_type_choices():
-    """Retorna las opciones de tipos de movimiento."""
+    """Retorna las opciones de tipos de movimiento para un campo Selection."""
     return [(key, val) for key, val in MOVEMENT_TYPES.items()]
 
-
 def get_unit_measure_choices():
-    """Retorna las opciones de unidades de medida."""
+    """Retorna las opciones de unidades de medida para un campo Selection."""
     return [(key, val) for key, val in UNIT_MEASURES.items()]
 
+def get_product_type_choices():
+    """Retorna las opciones de tipos de producto SILICIE para un campo Selection."""
+    # Tipos de producto básicos SILICIE (2 caracteres máximo)
+    return [
+        ('AL', 'Alcohol'),
+        ('TB', 'Tabaco'),
+        ('HC', 'Hidrocarburos'),
+        ('MB', 'Mueble'),
+        ('OT', 'Otros'),
+    ]

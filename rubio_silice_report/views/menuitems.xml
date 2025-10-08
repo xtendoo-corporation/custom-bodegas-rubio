@@ -7,12 +7,17 @@
               parent="stock.menu_stock_warehouse_mgmt"
               sequence="100"/>
 
-    <!-- Submenú: Exportar entregas -->
+    <!-- Submenú: Silicie dentro de Informes -->
+    <menuitem id="menu_silicie_reports"
+              name="Silicie"
+              parent="stock.menu_warehouse_report"
+              sequence="999"/>
+
+    <!-- Submenú: Exportar entregas dentro de Silicie -->
     <menuitem id="menu_silicie_export_deliveries"
               name="Exportar Entregas (CSV)"
-              parent="menu_silicie_root"
+              parent="menu_silicie_reports"
               action="action_silice_report_wizard"
               sequence="10"/>
 
 </odoo>
-

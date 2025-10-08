@@ -12,7 +12,6 @@
                         <group string="Rango de Fechas">
                             <field name="date_start" required="1"/>
                             <field name="date_end" required="1"/>
-                            <field name="include_not_done"/>
                         </group>
                         <group string="Parámetros SILICIE">
                             <field name="csv_profile" required="1"/>
@@ -52,4 +51,3 @@
     </record>
 
 </odoo>
-

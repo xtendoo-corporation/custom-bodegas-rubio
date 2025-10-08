@@ -12,12 +12,6 @@ class ProductTemplate(models.Model):
         help='Código del producto para reportes SILICIE',
     )
 
-    silicie_tipo_producto = fields.Selection(
-        selection=lambda self: silicie_specs.get_product_type_choices(),
-        string='Tipo Producto SILICIE',
-        help='Tipo de producto según clasificación SILICIE (2 caracteres)',
-    )
-
     silicie_unidad_medida = fields.Selection(
         selection=lambda self: silicie_specs.get_unit_measure_choices(),
         string='Unidad Medida SILICIE',
@@ -32,29 +26,10 @@ class ProductTemplate(models.Model):
         digits=(5, 2),
     )
 
-    # Campos específicos para tabaco (IEST1CSV)
-    silicie_marca_comercial = fields.Char(
-        string='Marca Comercial',
-        help='Marca comercial para productos de tabaco',
-    )
-
-    silicie_precio_venta = fields.Float(
-        string='Precio Venta SILICIE',
-        help='Precio de venta para productos de tabaco',
-        digits=(10, 2),
-    )
-
-    # Campos específicos para hidrocarburos (IESH1CSV)
-    silicie_densidad = fields.Float(
-        string='Densidad',
-        help='Densidad para productos de hidrocarburos',
-        digits=(10, 4),
-    )
-
-    silicie_temperatura = fields.Float(
-        string='Temperatura',
-        help='Temperatura para productos de hidrocarburos',
-        digits=(5, 2),
+    numero_silice = fields.Char(
+        string='Número SILICIE',
+        size=20,
+        help='Número identificativo SILICIE para el producto'
     )
 
     @api.constrains('silicie_tipo_producto')

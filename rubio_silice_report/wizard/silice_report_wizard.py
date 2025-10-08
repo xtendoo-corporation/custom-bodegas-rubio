@@ -25,17 +25,12 @@ class SiliceReportWizard(models.TransientModel):
         default=fields.Datetime.now,
     )
 
-    include_not_done = fields.Boolean(
-        string='Incluir Programados',
-        default=False,
-        help='Incluir pickings programados (scheduled_date) si date_done es nulo',
-    )
-
     csv_profile = fields.Selection(
-        selection=lambda self: silicie_specs.get_profile_choices(),
+        selection=[('IESA1CSV', 'Alcohol (IESA1CSV)')],
         string='Perfil CSV SILICIE',
         required=True,
-        help='Perfil de importación por fichero SILICIE 2.0',
+        default='IESA1CSV',
+        help='Solo se permite Alcohol para la exportación SILICIE.',
     )
 
     movement_type = fields.Selection(
@@ -75,15 +70,6 @@ class SiliceReportWizard(models.TransientModel):
             ))
 
         silicie_specs.validate_cae(cae)
-
-        if not self.csv_profile:
-            raise UserError(_('Debe seleccionar un perfil CSV SILICIE.'))
-
-        if self.csv_profile not in silicie_specs.SILICIE_PROFILES:
-            raise UserError(_(
-                'Perfil CSV "%s" no encontrado en las especificaciones.'
-            ) % self.csv_profile)
-
         return True
 
     def _validate_dates(self):
@@ -112,41 +98,20 @@ class SiliceReportWizard(models.TransientModel):
         return date_start_normalized, date_end_normalized
 
     def _get_pickings(self, date_start, date_end):
-        """Busca los pickings de salida en el rango de fechas."""
+        """Busca los pickings de salida en el rango de fechas (solo los realizados)."""
         domain = [
             ('picking_type_code', '=', 'outgoing'),
-            ('state', 'in', ['done', 'assigned']),
+            ('state', '=', 'done'),
+            ('date_done', '>=', date_start),
+            ('date_done', '<=', date_end),
         ]
-
-        if self.include_not_done:
-            # Incluir done + programados
-            domain = [
-                ('picking_type_code', '=', 'outgoing'),
-                '|',
-                '&', ('state', '=', 'done'),
-                     ('date_done', '>=', date_start),
-                     ('date_done', '<=', date_end),
-                '&', ('state', '=', 'assigned'),
-                     ('scheduled_date', '>=', date_start),
-                     ('scheduled_date', '<=', date_end),
-            ]
-        else:
-            # Solo done con date_done
-            domain.extend([
-                ('state', '=', 'done'),
-                ('date_done', '>=', date_start),
-                ('date_done', '<=', date_end),
-            ])
-
         pickings = self.env['stock.picking'].search(domain, order='date_done, scheduled_date')
         return pickings
 
     def _get_silice_number(self, picking):
         """Obtiene el número de sílice del picking."""
-        ICP = self.env['ir.config_parameter'].sudo()
-        field_name = ICP.get_param('rubio_silice_report.silice_field_name', 'x_silice_number')
-
-        silice_number = getattr(picking, field_name, '') or ''
+        # Usar directamente el campo silice_sequence del picking
+        silice_number = picking.silice_sequence or ''
         return str(silice_number).strip()
 
     def _determine_movement_type(self, picking):
@@ -179,100 +144,75 @@ class SiliceReportWizard(models.TransientModel):
         product = self.env['product.product'].browse(product_id)
 
         # Si no tiene configuración SILICIE, retornar None
-        if not product.silicie_codigo_producto or not product.silicie_tipo_producto:
+        if not product.silicie_codigo_producto:
             return None
 
         return {
             'codigo_producto': product.silicie_codigo_producto,
-            'tipo_producto': product.silicie_tipo_producto,
             'unidad_medida': product.silicie_unidad_medida or 'UN',
             'graduacion': str(product.silicie_graduacion) if product.silicie_graduacion else '',
-            'marca_comercial': product.silicie_marca_comercial or '',
-            'precio_venta': str(product.silicie_precio_venta) if product.silicie_precio_venta else '',
-            'densidad': str(product.silicie_densidad) if product.silicie_densidad else '',
-            'temperatura': str(product.silicie_temperatura) if product.silicie_temperatura else '',
+            'numero_silice': product.numero_silice or '',
         }
 
     def _build_csv_rows(self, pickings):
-        """Construye las filas CSV desde los pickings."""
+        """Construye las filas de datos para el CSV SILICIE."""
         ICP = self.env['ir.config_parameter'].sudo()
-
-        # Obtener parámetros de configuración
         cae = ICP.get_param('rubio_silice_report.silicie_cae', '')
         establishment_type = ICP.get_param('rubio_silice_report.silicie_establishment_type', '')
         default_um = ICP.get_param('rubio_silice_report.silicie_default_um', 'LTS')
 
-        profile = silicie_specs.SILICIE_PROFILES.get(self.csv_profile)
-        version = profile.get('version', '1.0')
-
         fecha_presentacion = datetime.now()
-
         rows_data = []
         missing_products = set()
 
         for picking in pickings:
-            silice_number = self._get_silice_number(picking)
-
-            # Fecha del asiento: date_done o scheduled_date
             fecha_asiento = picking.date_done or picking.scheduled_date
             if not fecha_asiento:
                 continue
-
             movement_type = self._determine_movement_type(picking)
-
-            # Datos de destino
             partner = picking.partner_id
             destino_nif = partner.vat or ''
             destino_nombre = partner.name or ''
             destino_direccion = partner.contact_address or ''
             destino_pais = partner.country_id.code if partner.country_id else 'ES'
-
-            # Justificante (usar origin como num_justificante)
             num_justificante = picking.origin or picking.name
-            tipo_justificante = 'AL'  # Albarán por defecto
+            tipo_justificante = 'AL'
+            # Obtener número de sílice del picking usando el método existente
+            silice_number_base = self._get_silice_number(picking) or picking.name
 
-            # Procesar líneas de movimiento
-            for move_line in picking.move_line_ids.filtered(lambda ml: ml.quantity > 0):
+            for line_index, move_line in enumerate(picking.move_line_ids.filtered(lambda ml: ml.quantity > 0)):
                 product = move_line.product_id
-
-                # Obtener mapeo del producto
                 product_mapping = self._get_product_mapping(product.id)
                 if not product_mapping:
                     missing_products.add(f"{product.id} - {product.display_name}")
                     continue
+                numero_silice = f"{silice_number_base}-{line_index+1}"
+                # Cambiar referencia_interna para usar silice_number_base en lugar de picking.name
+                referencia_interna = f"{silice_number_base}-{line_index+1}"
+                cantidad = move_line.quantity if move_line.quantity is not None else 0.0
 
-                # Construir fila según perfil
+                # Construir fila directamente campo a campo en el orden exacto del CSV
                 row_data = {
-                    'numero_silice': silice_number,
-                    'cae': cae,
-                    'tipo_establecimiento': establishment_type,
-                    'fecha_presentacion': fecha_presentacion,
-                    'version_fichero': version,
-                    'fecha_asiento': fecha_asiento,
+                    'referencia_interna': referencia_interna,
+                    'fecha_movimiento': fecha_asiento,
+                    'fecha_registro_contable': fecha_presentacion,
                     'tipo_movimiento': movement_type,
-                    'codigo_producto': product_mapping.get('codigo_producto', ''),
-                    'tipo_producto': product_mapping.get('tipo_producto', ''),
-                    #'cantidad': move_line.qty_done,
-                    'cantidad': move_line.quantity,
-                    'unidad_medida': product_mapping.get('unidad_medida', default_um),
+                    'numero_silice': product_mapping.get('numero_silice', ''),  # Usar numero_silice del producto
+                    'cae': cae,
                     'destino_nif': destino_nif,
                     'destino_nombre': destino_nombre,
                     'destino_direccion': destino_direccion,
                     'destino_pais': destino_pais,
-                    'num_justificante': num_justificante,
                     'tipo_justificante': tipo_justificante,
-                    'observaciones': picking.note or '',
+                    'num_justificante': num_justificante,
+                    'unidad_medida': product_mapping.get('unidad_medida', default_um),
+                    'fecha_asiento': fecha_asiento,
+                    'tipo_establecimiento': establishment_type,
+                    'fecha_presentacion': fecha_presentacion,
+                    'codigo_producto': product_mapping.get('codigo_producto', ''),
+                    'graduacion': product_mapping.get('graduacion', ''),
+                    'cantidad': cantidad,
                 }
-
-                # Campos específicos según perfil/grupo
-                if self.csv_profile == 'IESH1CSV':  # Hidrocarburos
-                    row_data['densidad'] = product_mapping.get('densidad', '')
-                    row_data['temperatura'] = product_mapping.get('temperatura', '')
-                elif self.csv_profile == 'IEST1CSV':  # Tabaco
-                    row_data['marca_comercial'] = product_mapping.get('marca_comercial', '')
-                    row_data['precio_venta'] = product_mapping.get('precio_venta', '')
-                elif self.csv_profile == 'IESA1CSV':  # Alcohol
-                    row_data['graduacion'] = product_mapping.get('graduacion', '')
 
                 rows_data.append(row_data)
 
@@ -282,7 +222,6 @@ class SiliceReportWizard(models.TransientModel):
                 'Configure los campos SILICIE directamente en cada producto:\n'
                 'Inventario → Productos → [Producto] → Pestaña "SILICIE"'
             ) % '\n'.join(sorted(missing_products)))
-
         return rows_data
 
     def _generate_filename(self):
@@ -332,7 +271,6 @@ class SiliceReportWizard(models.TransientModel):
         try:
             csv_content = silicie_specs.generate_csv_content(
                 rows_data,
-                profile_key=self.csv_profile,
                 include_header=True
             )
         except ValidationError as e:

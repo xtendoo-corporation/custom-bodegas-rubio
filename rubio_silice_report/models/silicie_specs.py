@@ -14,228 +14,53 @@ from odoo.exceptions import ValidationError
 
 
 # ============================================================================
-# PERFILES CSV SILICIE 2.0
-# ============================================================================
-# Cada perfil define: separador, codificación, orden EXACTO de campos,
-# formatos de fecha/hora, versión del fichero, etc.
-
-SILICIE_PROFILES = {
-    'IESH1CSV': {
-        'name': 'Altas – Hidrocarburos',
-        'group': 'hidrocarburos',
-        'separator': ';',
-        'encoding': 'utf-8-sig',  # UTF-8 con BOM
-        'decimal_separator': ',',
-        'date_format': '%d/%m/%Y',
-        'datetime_format': '%d/%m/%Y %H:%M:%S',
-        'version': '1.0',
-        'fields': [
-            # Primera columna: número de sílice
-            {'name': 'numero_silice', 'required': True, 'type': 'char', 'length': 20},
-
-            # Bloque Identificación Establecimiento
-            {'name': 'cae', 'required': True, 'type': 'char', 'length': 16},
-            {'name': 'tipo_establecimiento', 'required': True, 'type': 'char', 'length': 2},
-
-            # Bloque Presentación
-            {'name': 'fecha_presentacion', 'required': True, 'type': 'datetime', 'format': 'datetime_format'},
-            {'name': 'version_fichero', 'required': True, 'type': 'char', 'length': 10},
-
-            # Bloque Datos del Asiento
-            {'name': 'fecha_asiento', 'required': True, 'type': 'date', 'format': 'date_format'},
-            {'name': 'tipo_movimiento', 'required': True, 'type': 'char', 'length': 3},
-            {'name': 'codigo_producto', 'required': True, 'type': 'char', 'length': 20},
-            {'name': 'tipo_producto', 'required': True, 'type': 'char', 'length': 2},
-            {'name': 'cantidad', 'required': True, 'type': 'float', 'decimals': 3},
-            {'name': 'unidad_medida', 'required': True, 'type': 'char', 'length': 3},
-            {'name': 'densidad', 'required': False, 'type': 'float', 'decimals': 4},
-            {'name': 'temperatura', 'required': False, 'type': 'float', 'decimals': 2},
-            {'name': 'destino_nif', 'required': False, 'type': 'char', 'length': 15},
-            {'name': 'destino_nombre', 'required': False, 'type': 'char', 'length': 100},
-            {'name': 'destino_direccion', 'required': False, 'type': 'char', 'length': 200},
-            {'name': 'destino_pais', 'required': False, 'type': 'char', 'length': 2},
-            {'name': 'num_justificante', 'required': False, 'type': 'char', 'length': 30},
-            {'name': 'tipo_justificante', 'required': False, 'type': 'char', 'length': 2},
-            {'name': 'observaciones', 'required': False, 'type': 'char', 'length': 500},
-        ],
-    },
-    'IEST1CSV': {
-        'name': 'Altas – Tabaco',
-        'group': 'tabaco',
-        'separator': ';',
-        'encoding': 'utf-8-sig',
-        'decimal_separator': ',',
-        'date_format': '%d/%m/%Y',
-        'datetime_format': '%d/%m/%Y %H:%M:%S',
-        'version': '1.0',
-        'fields': [
-            # Primera columna: número de sílice
-            {'name': 'numero_silice', 'required': True, 'type': 'char', 'length': 20},
-
-            # Bloque Identificación Establecimiento
-            {'name': 'cae', 'required': True, 'type': 'char', 'length': 16},
-            {'name': 'tipo_establecimiento', 'required': True, 'type': 'char', 'length': 2},
-
-            # Bloque Presentación
-            {'name': 'fecha_presentacion', 'required': True, 'type': 'datetime', 'format': 'datetime_format'},
-            {'name': 'version_fichero', 'required': True, 'type': 'char', 'length': 10},
-
-            # Bloque Datos del Asiento
-            {'name': 'fecha_asiento', 'required': True, 'type': 'date', 'format': 'date_format'},
-            {'name': 'tipo_movimiento', 'required': True, 'type': 'char', 'length': 3},
-            {'name': 'codigo_producto', 'required': True, 'type': 'char', 'length': 20},
-            {'name': 'tipo_producto', 'required': True, 'type': 'char', 'length': 2},
-            {'name': 'marca_comercial', 'required': False, 'type': 'char', 'length': 100},
-            {'name': 'cantidad', 'required': True, 'type': 'float', 'decimals': 3},
-            {'name': 'unidad_medida', 'required': True, 'type': 'char', 'length': 3},
-            {'name': 'precio_venta', 'required': False, 'type': 'float', 'decimals': 2},
-            {'name': 'destino_nif', 'required': False, 'type': 'char', 'length': 15},
-            {'name': 'destino_nombre', 'required': False, 'type': 'char', 'length': 100},
-            {'name': 'destino_direccion', 'required': False, 'type': 'char', 'length': 200},
-            {'name': 'destino_pais', 'required': False, 'type': 'char', 'length': 2},
-            {'name': 'num_justificante', 'required': False, 'type': 'char', 'length': 30},
-            {'name': 'tipo_justificante', 'required': False, 'type': 'char', 'length': 2},
-            {'name': 'observaciones', 'required': False, 'type': 'char', 'length': 500},
-        ],
-    },
-    'IESA1CSV': {
-        'name': 'Altas – Alcohol y Bebidas Alcohólicas',
-        'group': 'alcohol',
-        'separator': ';',
-        'encoding': 'utf-8-sig',
-        'decimal_separator': ',',
-        'date_format': '%d/%m/%Y',
-        'datetime_format': '%d/%m/%Y %H:%M:%S',
-        'version': '1.0',
-        'fields': [
-            # Primera columna: número de sílice
-            {'name': 'numero_silice', 'required': True, 'type': 'char', 'length': 20},
-
-            # Bloque Identificación Establecimiento
-            {'name': 'cae', 'required': True, 'type': 'char', 'length': 16},
-            {'name': 'tipo_establecimiento', 'required': True, 'type': 'char', 'length': 2},
-
-            # Bloque Presentación
-            {'name': 'fecha_presentacion', 'required': True, 'type': 'datetime', 'format': 'datetime_format'},
-            {'name': 'version_fichero', 'required': True, 'type': 'char', 'length': 10},
-
-            # Bloque Datos del Asiento
-            {'name': 'fecha_asiento', 'required': True, 'type': 'date', 'format': 'date_format'},
-            {'name': 'tipo_movimiento', 'required': True, 'type': 'char', 'length': 3},
-            {'name': 'codigo_producto', 'required': True, 'type': 'char', 'length': 20},
-            {'name': 'tipo_producto', 'required': True, 'type': 'char', 'length': 2},
-            {'name': 'graduacion', 'required': False, 'type': 'float', 'decimals': 2},
-            {'name': 'cantidad', 'required': True, 'type': 'float', 'decimals': 3},
-            {'name': 'unidad_medida', 'required': True, 'type': 'char', 'length': 3},
-            {'name': 'destino_nif', 'required': False, 'type': 'char', 'length': 15},
-            {'name': 'destino_nombre', 'required': False, 'type': 'char', 'length': 100},
-            {'name': 'destino_direccion', 'required': False, 'type': 'char', 'length': 200},
-            {'name': 'destino_pais', 'required': False, 'type': 'char', 'length': 2},
-            {'name': 'num_justificante', 'required': False, 'type': 'char', 'length': 30},
-            {'name': 'tipo_justificante', 'required': False, 'type': 'char', 'length': 2},
-            {'name': 'observaciones', 'required': False, 'type': 'char', 'length': 500},
-        ],
-    },
-}
-
-
-# ============================================================================
-# TABLAS Y CÓDIGOS SILICIE
+# CONFIGURACIÓN FIJA SILICIE - ALCOHOL (IESA1CSV)
 # ============================================================================
 
-# Tipos de Establecimiento SILICIE
-ESTABLISHMENT_TYPES = {
-    'FA': 'Fábrica',
-    'DE': 'Depósito Fiscal',
-    'EX': 'Exportador',
-    'IM': 'Importador',
-    'DT': 'Destinatario Registrado',
-    'OP': 'Operador Registrado',
-    'RE': 'Representante Fiscal',
-}
-
-# Tipos de Movimiento SILICIE (Salidas)
-MOVEMENT_TYPES = {
-    'A08': 'Salida a consumo - territorio interior',
-    'A09': 'Salida a consumo - Canarias, Ceuta o Melilla',
-    'A10': 'Salida en régimen suspensivo - UE',
-    'A11': 'Salida en régimen suspensivo - exportación',
-    'A12': 'Salida para entrega exenta',
-    'A13': 'Salida para uso de las fuerzas armadas de un Estado miembro',
-    'A14': 'Salida para venta a bordo',
-    'A15': 'Otras salidas',
-    'A16': 'Salida para destrucción',
-    'A17': 'Salida a otro depósito fiscal del mismo titular',
-}
-
-# Tipos de Justificante
-JUSTIFICANT_TYPES = {
-    'FA': 'Factura',
-    'AL': 'Albarán',
-    'DU': 'DUA',
-    'DA': 'Documento Administrativo',
-    'ED': 'e-DA (Documento Administrativo Electrónico)',
-    'OT': 'Otro',
-}
-
-# Unidades de Medida
-UNIT_MEASURES = {
-    'LTS': 'Litros',
-    'KGS': 'Kilogramos',
-    'UNI': 'Unidades',
-    'CAJ': 'Cajas',
-    'HL': 'Hectolitros',
-    'HPA': 'Hectolitros de alcohol puro',
-}
-
-# Códigos de País (ISO 3166-1 alpha-2)
-COUNTRY_CODES = {
-    'ES': 'España',
-    'FR': 'Francia',
-    'DE': 'Alemania',
-    'IT': 'Italia',
-    'PT': 'Portugal',
-    'GB': 'Reino Unido',
-    'US': 'Estados Unidos',
-    # Añadir más según necesidad
-}
-
-
+# Configuración del CSV
+SEPARATOR = ';'
+ENCODING = 'utf-8-sig'
+DECIMAL_SEPARATOR = '.'
+DATE_FORMAT = '%d/%m/%Y'
+DATETIME_FORMAT = '%d/%m/%Y'  # Solo fecha
 # ============================================================================
 # FUNCIONES DE FORMATO Y VALIDACIÓN
 # ============================================================================
 
-def format_date(date_obj, profile_key='IESH1CSV'):
-    """Formatea fecha según el formato del perfil SILICIE."""
+def format_date(date_obj):
+    """Formatea fecha según el formato SILICIE."""
     if not date_obj:
         return ''
-    profile = SILICIE_PROFILES.get(profile_key, {})
-    date_format = profile.get('date_format', '%d/%m/%Y')
     if isinstance(date_obj, str):
         return date_obj
-    return date_obj.strftime(date_format)
+    return date_obj.strftime(DATE_FORMAT)
 
 
-def format_datetime(datetime_obj, profile_key='IESH1CSV'):
-    """Formatea fecha-hora según el formato del perfil SILICIE."""
+def format_datetime(datetime_obj):
+    """Formatea fecha-hora según el formato SILICIE, solo dd/mm/yyyy."""
     if not datetime_obj:
         return ''
-    profile = SILICIE_PROFILES.get(profile_key, {})
-    datetime_format = profile.get('datetime_format', '%d/%m/%Y %H:%M:%S')
     if isinstance(datetime_obj, str):
-        return datetime_obj
-    return datetime_obj.strftime(datetime_format)
+        # Si ya es string, intenta truncar a solo fecha
+        try:
+            return datetime.strptime(datetime_obj[:10], '%d/%m/%Y').strftime(DATE_FORMAT)
+        except Exception:
+            return datetime_obj[:10]
+    return datetime_obj.strftime(DATE_FORMAT)
 
 
-def format_float(value, decimals=2, profile_key='IESH1CSV'):
-    """Formatea número decimal según el separador del perfil."""
+def format_float(value, decimals=2):
+    """Formatea número decimal según el separador SILICIE."""
     if value is None:
         return ''
-    profile = SILICIE_PROFILES.get(profile_key, {})
-    decimal_sep = profile.get('decimal_separator', ',')
-    formatted = f"{float(value):.{decimals}f}"
-    if decimal_sep == ',':
-        formatted = formatted.replace('.', ',')
+
+    # Si el valor es un entero, no mostrar decimales
+    if float(value) == int(float(value)):
+        formatted = str(int(float(value)))
+    else:
+        formatted = f"{float(value):.{decimals}f}"
+        if DECIMAL_SEPARATOR == ',':
+            formatted = formatted.replace('.', ',')
     return formatted
 
 
@@ -257,56 +82,118 @@ def validate_cae(cae):
 
 def validate_movement_type(movement_type):
     """Valida que el tipo de movimiento exista en tablas SILICIE."""
-    if movement_type not in MOVEMENT_TYPES:
+    valid_types = ['A08', 'A09', 'A10', 'A11', 'A12', 'A13', 'A14', 'A15', 'A16', 'A17']
+    if movement_type not in valid_types:
         raise ValidationError(
             f"Tipo de movimiento '{movement_type}' no válido. "
-            f"Debe ser uno de: {', '.join(MOVEMENT_TYPES.keys())}"
+            f"Debe ser uno de: {', '.join(valid_types)}"
         )
     return True
 
 
 def validate_establishment_type(est_type):
     """Valida tipo de establecimiento."""
-    if est_type and est_type not in ESTABLISHMENT_TYPES:
-        raise ValidationError(
-            f"Tipo de establecimiento '{est_type}' no válido. "
-            f"Debe ser uno de: {', '.join(ESTABLISHMENT_TYPES.keys())}"
-        )
+    if est_type:
+        valid_types = ['FA', 'DE', 'EX', 'IM', 'DT', 'OP', 'RE']
+        if est_type not in valid_types:
+            raise ValidationError(
+                f"Tipo de establecimiento '{est_type}' no válido. "
+                f"Debe ser uno de: {', '.join(valid_types)}"
+            )
     return True
 
 
 def validate_unit_measure(unit):
     """Valida unidad de medida."""
-    if unit and unit not in UNIT_MEASURES:
-        raise ValidationError(
-            f"Unidad de medida '{unit}' no válida. "
-            f"Debe ser una de: {', '.join(UNIT_MEASURES.keys())}"
-        )
+    if unit:
+        valid_units = ['LTS', 'KGS', 'UNI', 'CAJ', 'HL', 'HPA']
+        if unit not in valid_units:
+            raise ValidationError(
+                f"Unidad de medida '{unit}' no válida. "
+                f"Debe ser una de: {', '.join(valid_units)}"
+            )
     return True
 
 
-def validate_row(row_data, profile_key='IESH1CSV'):
-    """
-    Valida una fila completa según el perfil SILICIE.
-    row_data: dict con los valores de cada campo
-    """
-    profile = SILICIE_PROFILES.get(profile_key)
-    if not profile:
-        raise ValidationError(f"Perfil '{profile_key}' no encontrado.")
-
+def validate_row(row_data):
+    """Valida una fila completa según las especificaciones SILICIE."""
     errors = []
-    for field_spec in profile['fields']:
-        field_name = field_spec['name']
+    required_fields = [
+        'referencia_interna',
+        'fecha_movimiento',
+        'fecha_registro_contable',
+        'tipo_movimiento',
+        'numero_silice',
+        'cae',
+        'tipo_justificante',
+        'unidad_medida',
+        'fecha_asiento',
+        'tipo_establecimiento',
+        'fecha_presentacion',
+        'codigo_producto',
+        'cantidad',
+    ]
+
+    csv_fields = [
+        'referencia_interna',
+        'fecha_movimiento',
+        'fecha_registro_contable',
+        'tipo_movimiento',
+        'numero_silice',
+        'cae',
+        'destino_nif',
+        'destino_nombre',
+        'destino_direccion',
+        'destino_pais',
+        'tipo_justificante',
+        'num_justificante',
+        'unidad_medida',
+        'fecha_asiento',
+        'tipo_establecimiento',
+        'fecha_presentacion',
+        'codigo_producto',
+        'graduacion',
+        'cantidad',
+    ]
+
+    for field_name in csv_fields:
         value = row_data.get(field_name)
 
         # Validar campos requeridos
-        if field_spec.get('required') and not value:
+        if field_name in required_fields and not value:
             errors.append(f"Campo '{field_name}' es obligatorio y está vacío.")
 
         # Validar longitud
-        if value and field_spec['type'] == 'char':
-            max_len = field_spec.get('length', 0)
-            if len(str(value)) > max_len:
+        if value:
+            max_len = None
+            if field_name == 'referencia_interna':
+                max_len = 40
+            elif field_name == 'tipo_movimiento':
+                max_len = 3
+            elif field_name == 'numero_silice':
+                max_len = 20
+            elif field_name == 'cae':
+                max_len = 16
+            elif field_name == 'destino_nif':
+                max_len = 15
+            elif field_name == 'destino_nombre':
+                max_len = 100
+            elif field_name == 'destino_direccion':
+                max_len = 200
+            elif field_name == 'destino_pais':
+                max_len = 2
+            elif field_name == 'tipo_justificante':
+                max_len = 2
+            elif field_name == 'num_justificante':
+                max_len = 30
+            elif field_name == 'unidad_medida':
+                max_len = 3
+            elif field_name == 'tipo_establecimiento':
+                max_len = 2
+            elif field_name == 'codigo_producto':
+                max_len = 20
+
+            if max_len and len(str(value)) > max_len:
                 errors.append(
                     f"Campo '{field_name}' excede longitud máxima ({max_len}): '{value}'"
                 )
@@ -317,106 +204,265 @@ def validate_row(row_data, profile_key='IESH1CSV'):
     return True
 
 
-def build_csv_row(row_data, profile_key='IESH1CSV'):
+def build_csv_row(row_data):
     """
-    Construye una fila CSV con el orden EXACTO de campos del perfil.
+    Construye una fila CSV con el orden EXACTO de campos.
     row_data: dict con los valores
     Retorna: lista de valores en el orden correcto
     """
-    profile = SILICIE_PROFILES.get(profile_key)
-    if not profile:
-        raise ValidationError(f"Perfil '{profile_key}' no encontrado.")
+    csv_fields = [
+        'referencia_interna',
+        'fecha_movimiento',
+        'fecha_registro_contable',
+        'tipo_movimiento',
+        'numero_silice',
+        'cae',
+        'destino_nif',
+        'destino_nombre',
+        'destino_direccion',
+        'destino_pais',
+        'tipo_justificante',
+        'num_justificante',
+        'unidad_medida',
+        'fecha_asiento',
+        'tipo_establecimiento',
+        'fecha_presentacion',
+        'codigo_producto',
+        'graduacion',
+        'cantidad',
+    ]
 
     row = []
-    for field_spec in profile['fields']:
-        field_name = field_spec['name']
+    missing_fields = []
+    extra_fields = [k for k in row_data.keys() if k not in csv_fields]
+
+    if extra_fields:
+        raise ValidationError(f"El diccionario row_data contiene campos extra no definidos: {extra_fields}. Esto provoca desplazamientos en el CSV.\nContenido: {row_data}")
+
+    for field_name in csv_fields:
+        if field_name not in row_data:
+            missing_fields.append(field_name)
         value = row_data.get(field_name, '')
 
         # Aplicar formato según tipo
-        if field_spec['type'] == 'date' and value:
-            value = format_date(value, profile_key)
-        elif field_spec['type'] == 'datetime' and value:
-            value = format_datetime(value, profile_key)
-        elif field_spec['type'] == 'float' and value:
-            decimals = field_spec.get('decimals', 2)
-            value = format_float(value, decimals, profile_key)
-        elif field_spec['type'] == 'char':
-            max_len = field_spec.get('length', 0)
-            value = truncate_field(value, max_len)
+        # Campos tipo fecha
+        if field_name in ['fecha_movimiento', 'fecha_asiento'] and value:
+            value = format_date(value)
+        # Campos tipo datetime
+        elif field_name in ['fecha_registro_contable', 'fecha_presentacion'] and value:
+            value = format_datetime(value)
+        # Campos tipo float
+        elif field_name in ['graduacion', 'cantidad']:
+            decimals = 2  # Por defecto 2 decimales para campos float
+            value = format_float(value if value != '' else 0.0, decimals)
+        else:
+            # Aplicar truncamiento según longitud máxima
+            max_len = None
+            if field_name == 'referencia_interna':
+                max_len = 40
+            elif field_name == 'tipo_movimiento':
+                max_len = 3
+            elif field_name == 'numero_silice':
+                max_len = 20
+            elif field_name == 'cae':
+                max_len = 16
+            elif field_name == 'destino_nif':
+                max_len = 15
+            elif field_name == 'destino_nombre':
+                max_len = 100
+            elif field_name == 'destino_direccion':
+                max_len = 200
+            elif field_name == 'destino_pais':
+                max_len = 2
+            elif field_name == 'tipo_justificante':
+                max_len = 2
+            elif field_name == 'num_justificante':
+                max_len = 30
+            elif field_name == 'unidad_medida':
+                max_len = 3
+            elif field_name == 'tipo_establecimiento':
+                max_len = 2
+            elif field_name == 'codigo_producto':
+                max_len = 20
 
-        row.append(str(value) if value else '')
+            if max_len:
+                value = truncate_field(value, max_len)
+
+        row.append(str(value) if value is not None else '')
+
+    if missing_fields:
+        raise ValidationError(f"Faltan los siguientes campos en los datos: {', '.join(missing_fields)}. Esto provoca desplazamientos en el CSV.\nContenido: {row_data}")
+
+    if len(row) != len(csv_fields):
+        raise ValidationError(f"La fila generada tiene {len(row)} columnas pero se esperan {len(csv_fields)}.\nFila: {row}\nContenido: {row_data}")
 
     return row
 
 
-def build_csv_header(profile_key='IESH1CSV'):
-    """Construye la cabecera CSV con nombres de campos del perfil."""
-    profile = SILICIE_PROFILES.get(profile_key)
-    if not profile:
-        raise ValidationError(f"Perfil '{profile_key}' no encontrado.")
+def build_csv_header():
+    """Construye la cabecera CSV con nombres legibles."""
+    csv_fields = [
+        'referencia_interna',
+        'fecha_movimiento',
+        'fecha_registro_contable',
+        'tipo_movimiento',
+        'numero_silice',
+        'cae',
+        'destino_nif',
+        'destino_nombre',
+        'destino_direccion',
+        'destino_pais',
+        'tipo_justificante',
+        'num_justificante',
+        'unidad_medida',
+        'fecha_asiento',
+        'tipo_establecimiento',
+        'fecha_presentacion',
+        'codigo_producto',
+        'graduacion',
+        'cantidad',
+    ]
 
-    return [field['name'] for field in profile['fields']]
+    headers = []
+    for field_name in csv_fields:
+        if field_name == 'referencia_interna':
+            headers.append('Numero Referencia Interna')
+        elif field_name == 'fecha_movimiento':
+            headers.append('Fecha Movimiento')
+        elif field_name == 'fecha_registro_contable':
+            headers.append('Fecha Registro Contable')
+        elif field_name == 'tipo_movimiento':
+            headers.append('Tipo Movimiento')
+        elif field_name == 'numero_silice':
+            headers.append('Numero Silicie')
+        elif field_name == 'cae':
+            headers.append('CAE')
+        elif field_name == 'destino_nif':
+            headers.append('Destino NIF')
+        elif field_name == 'destino_nombre':
+            headers.append('Destino Nombre')
+        elif field_name == 'destino_direccion':
+            headers.append('Destino Direccion')
+        elif field_name == 'destino_pais':
+            headers.append('Destino Pais')
+        elif field_name == 'tipo_justificante':
+            headers.append('Tipo Justificante')
+        elif field_name == 'num_justificante':
+            headers.append('Numero Justificante')
+        elif field_name == 'unidad_medida':
+            headers.append('Unidad Medida')
+        elif field_name == 'fecha_asiento':
+            headers.append('Fecha Asiento')
+        elif field_name == 'tipo_establecimiento':
+            headers.append('Tipo Establecimiento')
+        elif field_name == 'fecha_presentacion':
+            headers.append('Fecha Presentacion')
+        elif field_name == 'codigo_producto':
+            headers.append('Codigo Producto')
+        elif field_name == 'graduacion':
+            headers.append('Graduacion')
+        elif field_name == 'cantidad':
+            headers.append('Cantidad')
+        else:
+            headers.append(field_name)
+
+    return headers
 
 
-def generate_csv_content(rows_data, profile_key='IESH1CSV', include_header=True):
+def generate_csv_content(rows_data, include_header=True):
     """
     Genera el contenido CSV completo.
     rows_data: lista de dicts, cada uno representa una fila
     Retorna: bytes del CSV
     """
-    profile = SILICIE_PROFILES.get(profile_key)
-    if not profile:
-        raise ValidationError(f"Perfil '{profile_key}' no encontrado.")
-
     output = io.StringIO()
     writer = csv.writer(
         output,
-        delimiter=profile['separator'],
+        delimiter=SEPARATOR,
         quotechar='"',
         quoting=csv.QUOTE_MINIMAL
     )
 
     # Cabecera
     if include_header:
-        header = build_csv_header(profile_key)
+        header = build_csv_header()
         writer.writerow(header)
 
     # Filas de datos
     for row_data in rows_data:
         # Validar antes de escribir
-        validate_row(row_data, profile_key)
-        csv_row = build_csv_row(row_data, profile_key)
+        validate_row(row_data)
+        csv_row = build_csv_row(row_data)
         writer.writerow(csv_row)
 
-    # Convertir a bytes con la codificación del perfil
+    # Convertir a bytes con la codificación fija
     content = output.getvalue()
-    encoding = profile.get('encoding', 'utf-8-sig')
-    return content.encode(encoding)
+    return content.encode(ENCODING)
 
-
-def get_profile_choices():
-    """Retorna las opciones de perfiles para un campo Selection."""
-    return [(key, val['name']) for key, val in SILICIE_PROFILES.items()]
 
 def get_establishment_type_choices():
     """Retorna las opciones de tipos de establecimiento para un campo Selection."""
-    return [(key, val) for key, val in ESTABLISHMENT_TYPES.items()]
+    return [
+        ('FA', 'Fábrica'),
+        ('DE', 'Depósito Fiscal'),
+        ('EX', 'Exportador'),
+        ('IM', 'Importador'),
+        ('DT', 'Destinatario Registrado'),
+        ('OP', 'Operador Registrado'),
+        ('RE', 'Representante Fiscal'),
+    ]
 
 def get_movement_type_choices():
     """Retorna las opciones de tipos de movimiento para un campo Selection."""
-    return [(key, val) for key, val in MOVEMENT_TYPES.items()]
+    return [
+        ('A08', 'Salida a consumo - territorio interior'),
+        ('A09', 'Salida a consumo - Canarias, Ceuta o Melilla'),
+        ('A10', 'Salida en régimen suspensivo - UE'),
+        ('A11', 'Salida en régimen suspensivo - exportación'),
+        ('A12', 'Salida para entrega exenta'),
+        ('A13', 'Salida para uso de las fuerzas armadas de un Estado miembro'),
+        ('A14', 'Salida para venta a bordo'),
+        ('A15', 'Otras salidas'),
+        ('A16', 'Salida para destrucción'),
+        ('A17', 'Salida a otro depósito fiscal del mismo titular'),
+    ]
 
 def get_unit_measure_choices():
     """Retorna las opciones de unidades de medida para un campo Selection."""
-    return [(key, val) for key, val in UNIT_MEASURES.items()]
+    return [
+        ('LTS', 'Litros'),
+        ('KGS', 'Kilogramos'),
+        ('UNI', 'Unidades'),
+        ('CAJ', 'Cajas'),
+        ('HL', 'Hectolitros'),
+        ('HPA', 'Hectolitros de alcohol puro'),
+    ]
+
+def get_justificant_type_choices():
+    """Retorna las opciones de tipos de justificante para un campo Selection."""
+    return [
+        ('FA', 'Factura'),
+        ('AL', 'Albarán'),
+        ('DU', 'DUA'),
+        ('DA', 'Documento Administrativo'),
+        ('ED', 'e-DA (Documento Administrativo Electrónico)'),
+        ('OT', 'Otro'),
+    ]
+
+def get_country_choices():
+    """Retorna las opciones de países para un campo Selection."""
+    return [
+        ('ES', 'España'),
+        ('FR', 'Francia'),
+        ('DE', 'Alemania'),
+        ('IT', 'Italia'),
+        ('PT', 'Portugal'),
+        ('GB', 'Reino Unido'),
+        ('US', 'Estados Unidos'),
+    ]
 
 def get_product_type_choices():
-    """Retorna las opciones de tipos de producto SILICIE para un campo Selection."""
-    # Tipos de producto básicos SILICIE (2 caracteres máximo)
+    """Retorna las opciones de tipos de producto SILICIE para un campo Selection (solo alcohol)."""
     return [
         ('AL', 'Alcohol'),
-        ('TB', 'Tabaco'),
-        ('HC', 'Hidrocarburos'),
-        ('MB', 'Mueble'),
-        ('OT', 'Otros'),
     ]

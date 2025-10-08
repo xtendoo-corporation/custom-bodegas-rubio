@@ -76,3 +76,10 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='rubio_silice_report.silicie_default_movement_type',
         default='A08',
     )
+
+    silicie_codigo_epigrafe = fields.Char(
+        string='Código Epígrafe',
+        help='Código epígrafe SILICIE de la empresa (ej: A3 para bebidas espirituales)',
+        config_parameter='rubio_silice_report.silicie_codigo_epigrafe',
+        default='A3',
+    )

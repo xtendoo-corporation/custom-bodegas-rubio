@@ -12,6 +12,7 @@
                     <group>
                         <group string="Configuración Básica SILICIE">
                             <field name="silicie_codigo_producto"/>
+                            <field name="silicie_codigo_nc"/>
                             <field name="silicie_unidad_medida"/>
                             <field name="numero_silice"/>
                         </group>

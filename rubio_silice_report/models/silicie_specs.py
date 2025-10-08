@@ -123,14 +123,9 @@ def validate_row(row_data):
         'fecha_movimiento',
         'fecha_registro_contable',
         'tipo_movimiento',
-        'numero_silice',
         'cae',
         'tipo_justificante',
         'unidad_medida',
-        'fecha_asiento',
-        'tipo_establecimiento',
-        'fecha_presentacion',
-        'codigo_producto',
         'cantidad',
     ]
 
@@ -139,19 +134,16 @@ def validate_row(row_data):
         'fecha_movimiento',
         'fecha_registro_contable',
         'tipo_movimiento',
-        'numero_silice',
         'cae',
-        'destino_nif',
-        'destino_nombre',
-        'destino_direccion',
-        'destino_pais',
+        'nif_destinatario',
+        'razon_social',
         'tipo_justificante',
         'num_justificante',
         'unidad_medida',
-        'fecha_asiento',
-        'tipo_establecimiento',
-        'fecha_presentacion',
-        'codigo_producto',
+        'codigo_nc',
+        'codigo_epigrafe',
+        'descripcion_producto',
+        'tipo_envase',
         'graduacion',
         'cantidad',
     ]
@@ -170,28 +162,20 @@ def validate_row(row_data):
                 max_len = 40
             elif field_name == 'tipo_movimiento':
                 max_len = 3
-            elif field_name == 'numero_silice':
-                max_len = 20
             elif field_name == 'cae':
                 max_len = 16
-            elif field_name == 'destino_nif':
+            elif field_name == 'codigo_epigrafe':
+                max_len = 10
+            elif field_name == 'codigo_nc':
                 max_len = 15
-            elif field_name == 'destino_nombre':
-                max_len = 100
-            elif field_name == 'destino_direccion':
-                max_len = 200
-            elif field_name == 'destino_pais':
-                max_len = 2
+            elif field_name == 'nif_destinatario':
+                max_len = 15
             elif field_name == 'tipo_justificante':
                 max_len = 2
             elif field_name == 'num_justificante':
                 max_len = 30
             elif field_name == 'unidad_medida':
                 max_len = 3
-            elif field_name == 'tipo_establecimiento':
-                max_len = 2
-            elif field_name == 'codigo_producto':
-                max_len = 20
 
             if max_len and len(str(value)) > max_len:
                 errors.append(
@@ -215,29 +199,22 @@ def build_csv_row(row_data):
         'fecha_movimiento',
         'fecha_registro_contable',
         'tipo_movimiento',
-        'numero_silice',
         'cae',
-        'destino_nif',
-        'destino_nombre',
-        'destino_direccion',
-        'destino_pais',
+        'nif_destinatario',
+        'razon_social',
         'tipo_justificante',
         'num_justificante',
         'unidad_medida',
-        'fecha_asiento',
-        'tipo_establecimiento',
-        'fecha_presentacion',
-        'codigo_producto',
+        'codigo_nc',
+        'codigo_epigrafe',
+        'descripcion_producto',
+        'tipo_envase',
         'graduacion',
         'cantidad',
     ]
 
     row = []
     missing_fields = []
-    extra_fields = [k for k in row_data.keys() if k not in csv_fields]
-
-    if extra_fields:
-        raise ValidationError(f"El diccionario row_data contiene campos extra no definidos: {extra_fields}. Esto provoca desplazamientos en el CSV.\nContenido: {row_data}")
 
     for field_name in csv_fields:
         if field_name not in row_data:
@@ -246,10 +223,10 @@ def build_csv_row(row_data):
 
         # Aplicar formato según tipo
         # Campos tipo fecha
-        if field_name in ['fecha_movimiento', 'fecha_asiento'] and value:
+        if field_name in ['fecha_movimiento'] and value:
             value = format_date(value)
         # Campos tipo datetime
-        elif field_name in ['fecha_registro_contable', 'fecha_presentacion'] and value:
+        elif field_name in ['fecha_registro_contable'] and value:
             value = format_datetime(value)
         # Campos tipo float
         elif field_name in ['graduacion', 'cantidad']:
@@ -262,28 +239,20 @@ def build_csv_row(row_data):
                 max_len = 40
             elif field_name == 'tipo_movimiento':
                 max_len = 3
-            elif field_name == 'numero_silice':
-                max_len = 20
             elif field_name == 'cae':
                 max_len = 16
-            elif field_name == 'destino_nif':
+            elif field_name == 'codigo_epigrafe':
+                max_len = 10
+            elif field_name == 'codigo_nc':
                 max_len = 15
-            elif field_name == 'destino_nombre':
-                max_len = 100
-            elif field_name == 'destino_direccion':
-                max_len = 200
-            elif field_name == 'destino_pais':
-                max_len = 2
+            elif field_name == 'nif_destinatario':
+                max_len = 15
             elif field_name == 'tipo_justificante':
                 max_len = 2
             elif field_name == 'num_justificante':
                 max_len = 30
             elif field_name == 'unidad_medida':
                 max_len = 3
-            elif field_name == 'tipo_establecimiento':
-                max_len = 2
-            elif field_name == 'codigo_producto':
-                max_len = 20
 
             if max_len:
                 value = truncate_field(value, max_len)
@@ -306,19 +275,16 @@ def build_csv_header():
         'fecha_movimiento',
         'fecha_registro_contable',
         'tipo_movimiento',
-        'numero_silice',
         'cae',
-        'destino_nif',
-        'destino_nombre',
-        'destino_direccion',
-        'destino_pais',
+        'nif_destinatario',
+        'razon_social',
         'tipo_justificante',
         'num_justificante',
         'unidad_medida',
-        'fecha_asiento',
-        'tipo_establecimiento',
-        'fecha_presentacion',
-        'codigo_producto',
+        'codigo_nc',
+        'codigo_epigrafe',
+        'descripcion_producto',
+        'tipo_envase',
         'graduacion',
         'cantidad',
     ]
@@ -333,32 +299,26 @@ def build_csv_header():
             headers.append('Fecha Registro Contable')
         elif field_name == 'tipo_movimiento':
             headers.append('Tipo Movimiento')
-        elif field_name == 'numero_silice':
-            headers.append('Numero Silicie')
         elif field_name == 'cae':
             headers.append('CAE')
-        elif field_name == 'destino_nif':
-            headers.append('Destino NIF')
-        elif field_name == 'destino_nombre':
-            headers.append('Destino Nombre')
-        elif field_name == 'destino_direccion':
-            headers.append('Destino Direccion')
-        elif field_name == 'destino_pais':
-            headers.append('Destino Pais')
+        elif field_name == 'codigo_epigrafe':
+            headers.append('Código Epígrafe')
+        elif field_name == 'codigo_nc':
+            headers.append('Código NC')
+        elif field_name == 'nif_destinatario':
+            headers.append('NIF Destinatario')
+        elif field_name == 'razon_social':
+            headers.append('Razon Social')
         elif field_name == 'tipo_justificante':
             headers.append('Tipo Justificante')
         elif field_name == 'num_justificante':
             headers.append('Numero Justificante')
         elif field_name == 'unidad_medida':
             headers.append('Unidad Medida')
-        elif field_name == 'fecha_asiento':
-            headers.append('Fecha Asiento')
-        elif field_name == 'tipo_establecimiento':
-            headers.append('Tipo Establecimiento')
-        elif field_name == 'fecha_presentacion':
-            headers.append('Fecha Presentacion')
-        elif field_name == 'codigo_producto':
-            headers.append('Codigo Producto')
+        elif field_name == 'descripcion_producto':
+            headers.append('Descripcion Producto')
+        elif field_name == 'tipo_envase':
+            headers.append('Tipo Envase')
         elif field_name == 'graduacion':
             headers.append('Graduacion')
         elif field_name == 'cantidad':
@@ -465,4 +425,10 @@ def get_product_type_choices():
     """Retorna las opciones de tipos de producto SILICIE para un campo Selection (solo alcohol)."""
     return [
         ('AL', 'Alcohol'),
+    ]
+
+def get_profile_choices():
+    """Retorna las opciones de perfiles CSV SILICIE para un campo Selection."""
+    return [
+        ('IESA1CSV', 'Alcohol - IESA1CSV'),
     ]

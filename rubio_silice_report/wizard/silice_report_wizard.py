@@ -148,7 +148,7 @@ class SiliceReportWizard(models.TransientModel):
             return None
 
         return {
-            'codigo_producto': product.silicie_codigo_producto,
+            'codigo_nc': product.silicie_codigo_nc or '',
             'unidad_medida': product.silicie_unidad_medida or 'UN',
             'graduacion': str(product.silicie_graduacion) if product.silicie_graduacion else '',
             'numero_silice': product.numero_silice or '',
@@ -158,6 +158,7 @@ class SiliceReportWizard(models.TransientModel):
         """Construye las filas de datos para el CSV SILICIE."""
         ICP = self.env['ir.config_parameter'].sudo()
         cae = ICP.get_param('rubio_silice_report.silicie_cae', '')
+        codigo_epigrafe = ICP.get_param('rubio_silice_report.silicie_codigo_epigrafe', 'A3')
         establishment_type = ICP.get_param('rubio_silice_report.silicie_establishment_type', '')
         default_um = ICP.get_param('rubio_silice_report.silicie_default_um', 'LTS')
 
@@ -171,10 +172,7 @@ class SiliceReportWizard(models.TransientModel):
                 continue
             movement_type = self._determine_movement_type(picking)
             partner = picking.partner_id
-            destino_nif = partner.vat or ''
-            destino_nombre = partner.name or ''
-            destino_direccion = partner.contact_address or ''
-            destino_pais = partner.country_id.code if partner.country_id else 'ES'
+            nif_destinatario = partner.vat or ''
             num_justificante = picking.origin or picking.name
             tipo_justificante = 'AL'
             # Obtener número de sílice del picking usando el método existente
@@ -197,19 +195,17 @@ class SiliceReportWizard(models.TransientModel):
                     'fecha_movimiento': fecha_asiento,
                     'fecha_registro_contable': fecha_presentacion,
                     'tipo_movimiento': movement_type,
-                    'numero_silice': product_mapping.get('numero_silice', ''),  # Usar numero_silice del producto
                     'cae': cae,
-                    'destino_nif': destino_nif,
-                    'destino_nombre': destino_nombre,
-                    'destino_direccion': destino_direccion,
-                    'destino_pais': destino_pais,
+                    'codigo_epigrafe': codigo_epigrafe,
+                    'codigo_nc': product_mapping.get('codigo_nc', ''),
+                    'nif_destinatario': nif_destinatario,
+                    'razon_social': partner.name or '',  # Añadir razón social del partner del albarán
                     'tipo_justificante': tipo_justificante,
                     'num_justificante': num_justificante,
                     'unidad_medida': product_mapping.get('unidad_medida', default_um),
-                    'fecha_asiento': fecha_asiento,
                     'tipo_establecimiento': establishment_type,
-                    'fecha_presentacion': fecha_presentacion,
-                    'codigo_producto': product_mapping.get('codigo_producto', ''),
+                    'descripcion_producto': product.name or '',  # Usar solo el nombre del producto sin código
+                    'tipo_envase': 'ADO1',  # Valor predeterminado para tipo de envase
                     'graduacion': product_mapping.get('graduacion', ''),
                     'cantidad': cantidad,
                 }

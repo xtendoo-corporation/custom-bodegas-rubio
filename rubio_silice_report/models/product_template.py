@@ -32,6 +32,12 @@ class ProductTemplate(models.Model):
         help='Número identificativo SILICIE para el producto'
     )
 
+    silicie_codigo_nc = fields.Char(
+        string='Código NC',
+        help='Código de nomenclatura combinada para SILICIE',
+        size=15,
+    )
+
     @api.constrains('silicie_tipo_producto')
     def _check_silicie_tipo_producto(self):
         """Validar que el tipo de producto SILICIE tenga máximo 2 caracteres."""

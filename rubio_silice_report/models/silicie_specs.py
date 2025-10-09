@@ -143,8 +143,8 @@ def validate_row(row_data):
         'codigo_nc',
         'codigo_epigrafe',
         'descripcion_producto',
-        'tipo_envase',
         'graduacion',
+        'tipo_envase',
         'cantidad',
     ]
 
@@ -208,8 +208,8 @@ def build_csv_row(row_data):
         'codigo_nc',
         'codigo_epigrafe',
         'descripcion_producto',
-        'tipo_envase',
         'graduacion',
+        'tipo_envase',
         'cantidad',
     ]
 
@@ -284,8 +284,8 @@ def build_csv_header():
         'codigo_nc',
         'codigo_epigrafe',
         'descripcion_producto',
-        'tipo_envase',
         'graduacion',
+        'tipo_envase',
         'cantidad',
     ]
 

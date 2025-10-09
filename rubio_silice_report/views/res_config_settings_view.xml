@@ -29,19 +29,10 @@
                         </setting>
 
                         <setting>
-                            <field name="silicie_group"/>
-                            <div class="content-group">
-                                <div class="text-muted">
-                                    Grupo impositivo para determinar el perfil de fichero
-                                </div>
-                            </div>
-                        </setting>
-
-                        <setting>
                             <field name="silicie_csv_profile"/>
                             <div class="content-group">
                                 <div class="text-muted">
-                                    Perfil SILICIE 2.0: IESH1CSV (Hidrocarburos), IEST1CSV (Tabaco), IESA1CSV (Alcohol)
+                                    Perfil de importación por fichero SILICIE 2.0 para alcohol
                                 </div>
                             </div>
                         </setting>
@@ -82,13 +73,11 @@
                             </div>
                         </setting>
 
-                        <setting string="Mapeo de Productos (JSON)">
-                            <field name="silicie_product_mapping_json" widget="text" placeholder="{}"/>
+                        <setting>
+                            <field name="silicie_codigo_epigrafe" placeholder="A3"/>
                             <div class="content-group">
                                 <div class="text-muted">
-                                    Mapeo desde productos Odoo → identificación producto SILICIE
-                                    <br/>
-                                    Formato JSON: {"product_id": {"codigo_producto": "X", "tipo_producto": "Y", "unidad_medida": "LTS", ...}}
+                                    Código epígrafe SILICIE de la empresa (ej: A3 para bebidas espirituales)
                                 </div>
                             </div>
                         </setting>

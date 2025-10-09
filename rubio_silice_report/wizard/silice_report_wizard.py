@@ -203,10 +203,9 @@ class SiliceReportWizard(models.TransientModel):
                     'tipo_justificante': tipo_justificante,
                     'num_justificante': num_justificante,
                     'unidad_medida': product_mapping.get('unidad_medida', default_um),
-                    'tipo_establecimiento': establishment_type,
                     'descripcion_producto': product.name or '',  # Usar solo el nombre del producto sin código
-                    'tipo_envase': 'ADO1',  # Valor predeterminado para tipo de envase
                     'graduacion': product_mapping.get('graduacion', ''),
+                    'tipo_envase': 'ADO1',  # Valor predeterminado para tipo de envase
                     'cantidad': cantidad,
                 }
 

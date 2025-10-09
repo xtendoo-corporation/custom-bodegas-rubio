@@ -21,17 +21,6 @@ class ResConfigSettings(models.TransientModel):
         config_parameter='rubio_silice_report.silicie_establishment_type',
     )
 
-    silicie_group = fields.Selection(
-        selection=[
-            ('hidrocarburos', 'Hidrocarburos'),
-            ('tabaco', 'Tabaco / LCE'),
-            ('alcohol', 'Alcohol y Bebidas Alcohólicas'),
-        ],
-        string='Grupo Impositivo SILICIE',
-        help='Grupo impositivo para determinar el perfil de fichero CSV',
-        config_parameter='rubio_silice_report.silicie_group',
-    )
-
     silicie_csv_profile = fields.Selection(
         selection=lambda self: silicie_specs.get_profile_choices(),
         string='Perfil CSV de Importación',
@@ -59,14 +48,6 @@ class ResConfigSettings(models.TransientModel):
         help='Unidad de medida estandarizada SILICIE para cantidades',
         config_parameter='rubio_silice_report.silicie_default_um',
         default='LTS',
-    )
-
-    silicie_product_mapping_json = fields.Char(
-        string='Mapeo de Productos (JSON)',
-        help='Mapeo desde productos Odoo → identificación producto SILICIE\n'
-             'Formato: {"product_id": {"codigo_producto": "X", "tipo_producto": "Y", ...}}',
-        config_parameter='rubio_silice_report.silicie_product_mapping_json',
-        default='{}',
     )
 
     silicie_default_movement_type = fields.Selection(

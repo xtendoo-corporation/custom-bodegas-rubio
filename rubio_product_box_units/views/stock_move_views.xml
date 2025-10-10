@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2025 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <!-- Vista de formulario de albarán (stock.picking) -->
+    <record id="view_picking_form_box_units_rubio" model="ir.ui.view">
+        <field name="name">stock.picking.form.box.units.rubio</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_ids_without_package']/list/field[@name='product_uom_qty']" position="before">
+                <field name="boxes"/>
+                <field name="box_units" string="Ud/Caja"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de formulario de movimiento de stock (stock.move) -->
+    <record id="view_stock_move_form_box_units_rubio" model="ir.ui.view">
+        <field name="name">stock.move.form.box.units.rubio</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='product_uom_qty']" position="before">
+                <field name="boxes" string="Cajas"/>
+                <field name="box_units" string="Ud/Caja"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de árbol de movimiento de stock -->
+    <record id="view_stock_move_tree_box_units_rubio" model="ir.ui.view">
+        <field name="name">stock.move.tree.box.units.rubio</field>
+        <field name="model">stock.move</field>
+        <field name="inherit_id" ref="stock.view_move_tree"/>
+        <field name="arch" type="xml">
+            <field name="product_uom_qty" position="before">
+                <field name="boxes" optional="show"/>
+                <field name="box_units" optional="show"/>
+            </field>
+        </field>
+    </record>
+</odoo>

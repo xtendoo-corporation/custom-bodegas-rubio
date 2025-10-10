@@ -1,12 +1,15 @@
 from odoo import api, fields, models
+import logging
 
-class SaleOrderLine(models.Model):
-    _inherit = 'sale.order.line'
+_logger = logging.getLogger(__name__)
+
+
+class StockMove(models.Model):
+    _inherit = 'stock.move'
 
     boxes = fields.Float(
         string='Cajas',
         digits='Product Unit of Measure',
-        default=1.0,
         help='Número de cajas para este producto'
     )
     box_units = fields.Float(
@@ -39,20 +42,26 @@ class SaleOrderLine(models.Model):
         if self.product_uom_qty and self.box_units and self.box_units > 0:
             self.boxes = self.product_uom_qty / self.box_units
 
-    def _prepare_invoice_line(self, **optional_values):
-        """Sobrescribe para pasar el valor de cajas y ud/caja a la línea de factura"""
-        values = super()._prepare_invoice_line(**optional_values)
-        values.update({
-            'boxes': self.boxes,
-            'box_units': self.box_units,
-        })
-        return values
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create to get boxes and box_units from sale.order.line"""
+        moves = super(StockMove, self).create(vals_list)
 
-    def _prepare_procurement_values(self, group_id=False):
-        """Sobrescribe para pasar el valor de cajas y ud/caja a los movimientos de stock"""
-        values = super()._prepare_procurement_values(group_id=group_id)
-        values.update({
+        # Actualizar los valores después de la creación para evitar conflictos con defaults
+        for move in moves:
+            if move.sale_line_id:
+                move.write({
+                    'boxes': move.sale_line_id.boxes,
+                    'box_units': move.sale_line_id.box_units,
+                })
+
+        return moves
+
+    def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
+        """Override to add boxes and box_units to move line vals"""
+        res = super(StockMove, self)._prepare_move_line_vals(quantity=quantity, reserved_quant=reserved_quant)
+        res.update({
             'boxes': self.boxes,
             'box_units': self.box_units,
         })
-        return values
+        return res

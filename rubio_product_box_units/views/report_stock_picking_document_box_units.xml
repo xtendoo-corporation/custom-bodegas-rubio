@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Agregar columnas boxes y box_units en la tabla de movimientos (cuando NO está hecho) -->
+    <template id="report_delivery_document_box_units_moves" inherit_id="stock.report_delivery_document">
+        <xpath expr="//table[@name='stock_move_table']/thead/tr/th[@name='th_sm_product']" position="after">
+            <th name="th_sm_boxes" class="text-center"><strong>Cajas</strong></th>
+            <th name="th_sm_box_units" class="text-center"><strong>Ud/Caja</strong></th>
+        </xpath>
+
+        <xpath expr="//table[@name='stock_move_table']//tbody//td[1]" position="after">
+            <td name="td_boxes" class="text-center">
+                <span t-field="move.boxes"/>
+            </td>
+            <td name="td_box_units" class="text-center">
+                <span t-field="move.box_units"/>
+            </td>
+        </xpath>
+    </template>
+
+    <!-- Agregar columnas boxes y box_units en la tabla de líneas de movimiento (cuando está DONE) -->
+    <template id="report_delivery_document_box_units_move_lines" inherit_id="stock.report_delivery_document">
+        <xpath expr="//table[@name='stock_move_line_table']/thead/tr/th[@name='th_sml_product']" position="after">
+            <th name="th_sml_boxes" class="text-center"><strong>Cajas</strong></th>
+            <th name="th_sml_box_units" class="text-center"><strong>Ud/Caja</strong></th>
+        </xpath>
+    </template>
+
+    <!-- Agregar campos en el template de líneas con serial number -->
+    <template id="report_delivery_has_serial_box_units" inherit_id="stock.stock_report_delivery_has_serial_move_line">
+        <xpath expr="//td[@name='move_line_lot_quantity']" position="before">
+            <td class="text-center" name="move_line_boxes">
+                <span t-field="move_line.move_id.boxes"/>
+            </td>
+            <td class="text-center" name="move_line_box_units">
+                <span t-field="move_line.move_id.box_units"/>
+            </td>
+        </xpath>
+    </template>
+
+    <!-- Agregar campos en el template de líneas agregadas -->
+    <template id="report_delivery_aggregated_box_units" inherit_id="stock.stock_report_delivery_aggregated_move_lines">
+        <xpath expr="//td[@name='move_line_aggregated_qty_ordered']" position="before">
+            <td class="text-center" name="aggregated_boxes">
+                <span t-esc="aggregated_lines[line].get('boxes', 0.0)" t-options="{'widget': 'float', 'decimal_precision': 'Product Unit of Measure'}"/>
+            </td>
+            <td class="text-center" name="aggregated_box_units">
+                <span t-esc="aggregated_lines[line].get('box_units', 0.0)" t-options="{'widget': 'float', 'decimal_precision': 'Product Unit of Measure'}"/>
+            </td>
+        </xpath>
+    </template>
+</odoo>

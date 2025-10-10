@@ -1,0 +1,29 @@
+<!-- Copyright 2025 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <!-- Vista de formulario de línea de movimiento de stock (stock.move.line) -->
+    <record id="view_stock_move_line_form_box_units_rubio" model="ir.ui.view">
+        <field name="name">stock.move.line.form.box.units.rubio</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.view_move_line_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='quantity']" position="before">
+                <field name="boxes" string="Cajas"/>
+                <field name="box_units" string="Ud/Caja"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Vista de árbol de línea de movimiento de stock en el picking -->
+    <record id="view_stock_move_line_tree_box_units_rubio" model="ir.ui.view">
+        <field name="name">stock.move.line.tree.box.units.rubio</field>
+        <field name="model">stock.move.line</field>
+        <field name="inherit_id" ref="stock.view_stock_move_line_operation_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='quantity']" position="before">
+                <field name="boxes" optional="show"/>
+                <field name="box_units" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

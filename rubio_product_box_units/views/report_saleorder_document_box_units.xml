@@ -4,7 +4,7 @@
 <odoo>
     <template id="report_saleorder_document_box_units" inherit_id="sale.report_saleorder_document">
         <!-- Reemplazar el encabezado por el orden correcto -->
-        <xpath expr="//table[@class='o_has_total_table table o_main_table table-borderless']//thead/tr" position="replace">
+        <xpath expr="//table[hasclass('o_has_total_table')]//thead/tr" position="replace">
             <tr>
                 <th name="th_description" class="text-start">Descripción</th>
                 <th name="th_boxes" class="text-end">Cajas</th>

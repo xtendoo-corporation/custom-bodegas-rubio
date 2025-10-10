@@ -6,7 +6,10 @@
     "website": "https://xtendoo.es",
     "category": "Inventory/Reporting",
     "license": "LGPL-3",
-    "depends": ["stock"],
+    "depends": [
+        "stock",
+        "rubio_stock_picking_silice_sequence",
+    ],
     "data": [
         "security/ir.model.access.csv",
         "data/actions.xml",

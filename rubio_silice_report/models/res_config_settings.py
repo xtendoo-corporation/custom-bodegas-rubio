@@ -35,13 +35,6 @@ class ResConfigSettings(models.TransientModel):
         default='Europe/Madrid',
     )
 
-    silice_field_name = fields.Char(
-        string='Campo Número de Sílice',
-        help='Nombre del campo en stock.picking que contiene el número de sílice',
-        config_parameter='rubio_silice_report.silice_field_name',
-        default='x_silice_number',
-    )
-
     silicie_default_um = fields.Selection(
         selection=lambda self: silicie_specs.get_unit_measure_choices(),
         string='Unidad de Medida por Defecto',

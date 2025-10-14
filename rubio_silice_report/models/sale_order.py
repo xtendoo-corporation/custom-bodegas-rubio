@@ -7,17 +7,6 @@ from . import silicie_specs
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    silicie_movement_type_mode = fields.Selection(
-        [
-            ('default', 'Predeterminado (Todos)'),
-            ('custom', 'Personalizado'),
-        ],
-        string='Tipo Movimiento',
-        default='default',
-        required=True,
-        help='Seleccione si usar el tipo de movimiento predeterminado (Todos) o personalizarlo',
-    )
-
     silicie_movement_type = fields.Selection(
         selection=lambda self: silicie_specs.get_movement_type_choices(),
         string='Tipo de Movimiento SILICIE',
@@ -27,11 +16,13 @@ class SaleOrder(models.Model):
         readonly=False,
     )
 
-    @api.depends('silicie_movement_type_mode')
+    @api.depends('partner_id', 'partner_id.silicie_movement_type')
     def _compute_silicie_movement_type(self):
-        """Establecer el tipo de movimiento según el modo."""
+        """Establecer el tipo de movimiento según el partner."""
         for order in self:
-            # Si está en modo predeterminado, usar el primer valor válido (A08)
-            if order.silicie_movement_type_mode == 'default':
+            # Si el partner tiene un tipo de movimiento configurado, usarlo
+            if order.partner_id and order.partner_id.silicie_movement_type:
+                order.silicie_movement_type = order.partner_id.silicie_movement_type
+            # Si no hay valor en el partner, usar el valor por defecto (A08)
+            elif not order.silicie_movement_type:
                 order.silicie_movement_type = 'A08'
-            # Si está en modo personalizado, no tocar el valor que el usuario ha elegido

@@ -27,7 +27,7 @@
                                     <h4 class="alert-heading">Exportación CSV SILICIE 2.0</h4>
                                     <p>
                                         Este asistente genera un CSV de exportación conforme a SILICIE 2.0
-                                        con los pickings de tipo Entregas (outgoing) en el rango de fechas seleccionado.
+                                        con los albaranes de tipo Entregas (outgoing) en el rango de fechas seleccionado.
                                     </p>
                                     <hr/>
                                     <p class="mb-0">
@@ -35,8 +35,7 @@
                                     </p>
                                     <ul>
                                         <li>Configurar CAE y perfil CSV en Ajustes → Inventario → SILICIE</li>
-                                        <li>Configurar mapeo de productos en formato JSON</li>
-                                        <li>Los pickings deben tener número de sílice asignado</li>
+                                        <li>Los albarabes deben tener número de sílice asignado</li>
                                     </ul>
                                 </div>
                             </group>

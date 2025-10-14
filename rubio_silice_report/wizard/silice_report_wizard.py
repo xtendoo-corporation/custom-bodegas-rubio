@@ -13,16 +13,16 @@ class SiliceReportWizard(models.TransientModel):
     _name = 'silice.report.wizard'
     _description = 'Wizard de Exportación SILICIE 2.0'
 
-    date_start = fields.Datetime(
+    date_start = fields.Date(
         string='Fecha Inicio',
         required=True,
-        default=fields.Datetime.now,
+        default=lambda self: fields.Date.today().replace(day=1),
     )
 
-    date_end = fields.Datetime(
+    date_end = fields.Date(
         string='Fecha Fin',
         required=True,
-        default=fields.Datetime.now,
+        default=fields.Date.today,
     )
 
     csv_profile = fields.Selection(
@@ -84,17 +84,13 @@ class SiliceReportWizard(models.TransientModel):
         tz_name = ICP.get_param('rubio_silice_report.silicie_date_tz', 'Europe/Madrid')
         tz = pytz.timezone(tz_name)
 
-        # Convertir a zona horaria local
-        date_start_local = pytz.utc.localize(self.date_start).astimezone(tz)
-        date_end_local = pytz.utc.localize(self.date_end).astimezone(tz)
-
-        # Normalizar a 00:00:00 y 23:59:59
+        # Convertir fecha a datetime con hora 00:00:00 y 23:59:59
         date_start_normalized = tz.localize(
-            datetime.combine(date_start_local.date(), time.min)
+            datetime.combine(self.date_start, time.min)
         ).astimezone(pytz.utc).replace(tzinfo=None)
 
         date_end_normalized = tz.localize(
-            datetime.combine(date_end_local.date(), time.max)
+            datetime.combine(self.date_end, time.max)
         ).astimezone(pytz.utc).replace(tzinfo=None)
 
         return date_start_normalized, date_end_normalized
@@ -132,14 +128,14 @@ class SiliceReportWizard(models.TransientModel):
         """Obtiene el número de referencia para el picking."""
         # Usar el número del albarán (picking.name) como referencia principal
         # Si no existe, usar silice_sequence como fallback
-        return picking.name or picking.silice_sequence or ''
+        return picking.silice_sequence or ''
 
     def _determine_movement_type(self, picking):
         """
         Determina el tipo de movimiento SILICIE según el picking.
         Prioridad:
         1. Campo silicie_movement_type del picking (copiado del pedido de venta)
-        2. Campo partner_movement_type del cliente
+        2. Campo silicie_movement_type del cliente
         3. Valor por defecto A08
         """
         # Prioridad 1: Si el picking tiene tipo de movimiento asignado (copiado del pedido), usar ese
@@ -148,8 +144,8 @@ class SiliceReportWizard(models.TransientModel):
 
         # Prioridad 2: Si el partner tiene un tipo de movimiento asignado, usar ese
         partner = picking.partner_id
-        if partner and partner.partner_movement_type:
-            return partner.partner_movement_type
+        if partner and partner.silicie_movement_type:
+            return partner.silicie_movement_type
 
         # Prioridad 3: Usar A08 como valor por defecto
         return 'A08'
@@ -179,42 +175,20 @@ class SiliceReportWizard(models.TransientModel):
         fecha_presentacion = datetime.now()
         rows_data = []
         missing_products = set()
-        global_line_counter = 0  # Contador global para todas las líneas
 
         for picking in pickings:
+            global_line_counter = 0  # Contador global para todas las líneas
             fecha_asiento = picking.date_done or picking.scheduled_date
             if not fecha_asiento:
                 continue
             movement_type = self._determine_movement_type(picking)
             partner = picking.partner_id
             nif_destinatario = partner.vat or ''
-
-            # Obtener el número de justificante: Prioridad: Factura > Pedido > Albarán
-            num_justificante = ''
+            num_justificante = picking.name
             tipo_justificante = 'AL'  # Por defecto Albarán
 
-            # Buscar facturas asociadas al picking a través del pedido de venta
-            invoice = None
-            if picking.sale_id:
-                # Buscar factura asociada al pedido de venta
-                invoice = self.env['account.move'].search([
-                    ('invoice_origin', '=', picking.sale_id.name),
-                    ('move_type', '=', 'out_invoice'),
-                    ('state', '=', 'posted')
-                ], limit=1)
-
-            if invoice:
-                num_justificante = invoice.name
-                tipo_justificante = 'FA'  # Factura
-            elif picking.origin:
-                num_justificante = picking.origin
-                tipo_justificante = 'AL'  # Albarán (usando el pedido como referencia)
-            else:
-                num_justificante = picking.name
-                tipo_justificante = 'AL'  # Albarán
-
             # Obtener número de sílice del picking usando el método existente
-            silice_number_base = self._get_silice_number(picking) or picking.name
+            silice_number_base = self._get_silice_number(picking)
 
             for move_line in picking.move_line_ids.filtered(lambda ml: ml.quantity > 0):
                 product = move_line.product_id

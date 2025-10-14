@@ -7,10 +7,9 @@
         <field name="arch" type="xml">
             <xpath expr="//page[@name='sales_purchases']" position="inside">
                 <group string="SILICIE" name="silicie_group">
-                    <field name="partner_movement_type"/>
+                    <field name="silicie_movement_type"/>
                 </group>
             </xpath>
         </field>
     </record>
 </odoo>
-

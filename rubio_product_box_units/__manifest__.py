@@ -3,6 +3,7 @@
     'version': '1.0.1',
     'category': 'Custom',
     'summary': 'Agrega campos de cajas y unidades por caja a facturas y ventas',
+    'author': 'Ivan Parrado, Manuel Calero, Xtendoo SLU',
     'depends': ['sale', 'account', 'stock'],
     'data': [
         'views/product_template_views.xml',

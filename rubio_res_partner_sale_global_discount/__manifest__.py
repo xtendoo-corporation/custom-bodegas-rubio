@@ -10,7 +10,7 @@
         - Botón manual para aplicar descuentos en documentos de venta
         - Funcionalidad similar a los descuentos al pie de Odoo 18.0
     ''',
-    'author': 'Manuel Calero - Xtendoo',
+    'author': 'Ivan Parrado, Manuel Calero, Xtendoo SLU',
     'website': 'https://xtendoo.es',
     'license': 'LGPL-3',
     'depends': [

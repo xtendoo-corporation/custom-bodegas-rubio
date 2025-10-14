@@ -10,7 +10,7 @@
         * Es configurable por compañía
         * Se asigna automáticamente al validar el albarán de salida
     ''',
-    'author': 'Bodegas Rubio',
+    'author': 'Ivan Parrado, Manuel Calero, Xtendoo SLU',
     'website': 'https://www.bodegas-rubio.com',
     'depends': ['stock'],
     'data': [

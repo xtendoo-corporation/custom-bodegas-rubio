@@ -47,15 +47,6 @@
                         </setting>
 
                         <setting>
-                            <field name="silice_field_name" placeholder="x_silice_number"/>
-                            <div class="content-group">
-                                <div class="text-muted">
-                                    Nombre del campo en stock.picking que contiene el número de sílice
-                                </div>
-                            </div>
-                        </setting>
-
-                        <setting>
                             <field name="silicie_default_um"/>
                             <div class="content-group">
                                 <div class="text-muted">

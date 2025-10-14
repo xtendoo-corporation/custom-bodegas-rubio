@@ -8,6 +8,8 @@
     "license": "LGPL-3",
     "depends": [
         "stock",
+        "sale",
+        "sale_stock",
         "rubio_stock_picking_silice_sequence",
     ],
     "data": [
@@ -15,6 +17,8 @@
         "data/actions.xml",
         "views/res_config_settings_view.xml",
         "views/product_template_views.xml",
+        "views/res_partner_views.xml",
+        "views/sale_order_views.xml",
         "views/silice_report_wizard_views.xml",
         "views/menuitems.xml",
     ],

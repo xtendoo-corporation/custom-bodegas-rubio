@@ -33,30 +33,32 @@ class SiliceReportWizard(models.TransientModel):
         help='Solo se permite Alcohol para la exportación SILICIE.',
     )
 
+    all_movement_types = fields.Boolean(
+        string='Todos los tipos de movimiento',
+        default=True,
+        help='Si está marcado, se incluirán todos los tipos de movimiento en el reporte',
+    )
+
     movement_type = fields.Selection(
         selection=lambda self: silicie_specs.get_movement_type_choices(),
         string='Tipo de Movimiento',
-        required=True,
-        help='Tipo de movimiento SILICIE para las salidas',
+        required=False,
+        help='Tipo de movimiento SILICIE para las salidas (solo si no está marcado "Todos")',
     )
 
     @api.model
     def default_get(self, fields_list):
         """Cargar valores por defecto desde configuración."""
         res = super().default_get(fields_list)
-        ICP = self.env['ir.config_parameter'].sudo()
-
-        if 'csv_profile' in fields_list:
-            profile = ICP.get_param('rubio_silice_report.silicie_csv_profile')
-            if profile:
-                res['csv_profile'] = profile
-
-        if 'movement_type' in fields_list:
-            mov_type = ICP.get_param('rubio_silice_report.silicie_default_movement_type')
-            if mov_type:
-                res['movement_type'] = mov_type
-
+        # Por defecto, marcar "Todos los tipos de movimiento"
+        res['all_movement_types'] = True
         return res
+
+    @api.onchange('all_movement_types')
+    def _onchange_all_movement_types(self):
+        """Cuando se marca/desmarca el checkbox, limpiar el campo movement_type"""
+        if self.all_movement_types:
+            self.movement_type = False
 
     def _validate_configuration(self):
         """Valida que la configuración SILICIE esté completa."""
@@ -104,40 +106,53 @@ class SiliceReportWizard(models.TransientModel):
             ('state', '=', 'done'),
             ('date_done', '>=', date_start),
             ('date_done', '<=', date_end),
+            ('partner_id', '!=', False),  # Excluir pickings sin dirección de entrega
         ]
         pickings = self.env['stock.picking'].search(domain, order='date_done, scheduled_date')
+
+        # Si está marcado "Todos los tipos", devolver todos los pickings sin filtrar
+        if self.all_movement_types:
+            return pickings
+
+        # Si NO está marcado "Todos los tipos", filtrar por el tipo seleccionado
+        if self.movement_type:
+            filtered_pickings = self.env['stock.picking']
+            for picking in pickings:
+                # Determinar el tipo de movimiento que se usará para este picking
+                picking_movement_type = self._determine_movement_type(picking)
+                # Si coincide con el filtro del wizard, incluirlo
+                if picking_movement_type == self.movement_type:
+                    filtered_pickings |= picking
+            return filtered_pickings
+
+        # Si no está marcado "Todos" y no hay tipo seleccionado, devolver todos
         return pickings
 
     def _get_silice_number(self, picking):
-        """Obtiene el número de sílice del picking."""
-        # Usar directamente el campo silice_sequence del picking
-        silice_number = picking.silice_sequence or ''
-        return str(silice_number).strip()
+        """Obtiene el número de referencia para el picking."""
+        # Usar el número del albarán (picking.name) como referencia principal
+        # Si no existe, usar silice_sequence como fallback
+        return picking.name or picking.silice_sequence or ''
 
     def _determine_movement_type(self, picking):
         """
-        Determina el tipo de movimiento SILICIE según destino.
-        Por defecto: interior=A08, UE=A10, exportación=A11
+        Determina el tipo de movimiento SILICIE según el picking.
+        Prioridad:
+        1. Campo silicie_movement_type del picking (copiado del pedido de venta)
+        2. Campo partner_movement_type del cliente
+        3. Valor por defecto A08
         """
-        # Usar el tipo configurado en el wizard como base
-        movement_type = self.movement_type
+        # Prioridad 1: Si el picking tiene tipo de movimiento asignado (copiado del pedido), usar ese
+        if picking.silicie_movement_type:
+            return picking.silicie_movement_type
 
-        # Intentar determinar automáticamente según país destino
+        # Prioridad 2: Si el partner tiene un tipo de movimiento asignado, usar ese
         partner = picking.partner_id
-        if partner and partner.country_id:
-            country_code = partner.country_id.code
+        if partner and partner.partner_movement_type:
+            return partner.partner_movement_type
 
-            # España = territorio interior
-            if country_code == 'ES':
-                movement_type = 'A08'
-            # UE
-            elif partner.country_id.id in self.env.ref('base.europe').country_ids.ids:
-                movement_type = 'A10'
-            # Resto del mundo = exportación
-            else:
-                movement_type = 'A11'
-
-        return movement_type
+        # Prioridad 3: Usar A08 como valor por defecto
+        return 'A08'
 
     def _get_product_mapping(self, product_id):
         """Obtiene los datos SILICIE del producto directamente desde sus campos."""
@@ -149,9 +164,8 @@ class SiliceReportWizard(models.TransientModel):
 
         return {
             'codigo_nc': product.silicie_codigo_nc or '',
-            'unidad_medida': product.silicie_unidad_medida or 'UN',
+            'unidad_medida': product.silicie_unidad_medida or 'LTS',  # Por defecto Litros
             'graduacion': str(product.silicie_graduacion) if product.silicie_graduacion else '',
-            'numero_silice': product.numero_silice or '',
         }
 
     def _build_csv_rows(self, pickings):
@@ -165,6 +179,7 @@ class SiliceReportWizard(models.TransientModel):
         fecha_presentacion = datetime.now()
         rows_data = []
         missing_products = set()
+        global_line_counter = 0  # Contador global para todas las líneas
 
         for picking in pickings:
             fecha_asiento = picking.date_done or picking.scheduled_date
@@ -173,20 +188,46 @@ class SiliceReportWizard(models.TransientModel):
             movement_type = self._determine_movement_type(picking)
             partner = picking.partner_id
             nif_destinatario = partner.vat or ''
-            num_justificante = picking.origin or picking.name
-            tipo_justificante = 'AL'
+
+            # Obtener el número de justificante: Prioridad: Factura > Pedido > Albarán
+            num_justificante = ''
+            tipo_justificante = 'AL'  # Por defecto Albarán
+
+            # Buscar facturas asociadas al picking a través del pedido de venta
+            invoice = None
+            if picking.sale_id:
+                # Buscar factura asociada al pedido de venta
+                invoice = self.env['account.move'].search([
+                    ('invoice_origin', '=', picking.sale_id.name),
+                    ('move_type', '=', 'out_invoice'),
+                    ('state', '=', 'posted')
+                ], limit=1)
+
+            if invoice:
+                num_justificante = invoice.name
+                tipo_justificante = 'FA'  # Factura
+            elif picking.origin:
+                num_justificante = picking.origin
+                tipo_justificante = 'AL'  # Albarán (usando el pedido como referencia)
+            else:
+                num_justificante = picking.name
+                tipo_justificante = 'AL'  # Albarán
+
             # Obtener número de sílice del picking usando el método existente
             silice_number_base = self._get_silice_number(picking) or picking.name
 
-            for line_index, move_line in enumerate(picking.move_line_ids.filtered(lambda ml: ml.quantity > 0)):
+            for move_line in picking.move_line_ids.filtered(lambda ml: ml.quantity > 0):
                 product = move_line.product_id
                 product_mapping = self._get_product_mapping(product.id)
                 if not product_mapping:
                     missing_products.add(f"{product.id} - {product.display_name}")
                     continue
-                numero_silice = f"{silice_number_base}-{line_index+1}"
-                # Cambiar referencia_interna para usar silice_number_base en lugar de picking.name
-                referencia_interna = f"{silice_number_base}-{line_index+1}"
+
+                # Incrementar contador global
+                global_line_counter += 1
+
+                # Usar el número de sílice base con el contador global
+                referencia_interna = f"{silice_number_base}-{global_line_counter}"
                 cantidad = move_line.quantity if move_line.quantity is not None else 0.0
 
                 # Construir fila directamente campo a campo en el orden exacto del CSV

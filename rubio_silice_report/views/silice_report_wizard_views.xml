@@ -15,7 +15,8 @@
                         </group>
                         <group string="Parámetros SILICIE">
                             <field name="csv_profile" required="1"/>
-                            <field name="movement_type" required="1"/>
+                            <field name="all_movement_types"/>
+                            <field name="movement_type" required="0" invisible="all_movement_types" readonly="all_movement_types"/>
                         </group>
                     </group>
 

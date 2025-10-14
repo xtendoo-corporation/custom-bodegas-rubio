@@ -12,7 +12,6 @@ import io
 from datetime import datetime
 from odoo.exceptions import ValidationError
 
-
 # ============================================================================
 # CONFIGURACIÓN FIJA SILICIE - ALCOHOL (IESA1CSV)
 # ============================================================================
@@ -22,57 +21,29 @@ ENCODING = 'utf-8-sig'
 DECIMAL_SEPARATOR = '.'
 DATE_FORMAT = '%d/%m/%Y'
 
-# Orden y configuración de campos CSV
 CSV_FIELDS = [
-    'referencia_interna',
-    'fecha_movimiento',
-    'fecha_registro_contable',
-    'tipo_movimiento',
-    'cae',
-    'nif_destinatario',
-    'razon_social',
-    'tipo_justificante',
-    'num_justificante',
-    'unidad_medida',
-    'codigo_nc',
-    'codigo_epigrafe',
-    'descripcion_producto',
-    'graduacion',
-    'tipo_envase',
+    'referencia_interna', 'fecha_movimiento', 'fecha_registro_contable',
+    'tipo_movimiento', 'cae', 'nif_destinatario', 'razon_social',
+    'tipo_justificante', 'num_justificante', 'unidad_medida', 'codigo_nc',
+    'codigo_epigrafe', 'descripcion_producto', 'graduacion', 'tipo_envase',
     'cantidad',
 ]
 
-# Campos obligatorios
 REQUIRED_FIELDS = [
-    'referencia_interna',
-    'fecha_movimiento',
-    'fecha_registro_contable',
-    'tipo_movimiento',
-    'cae',
-    'tipo_justificante',
-    'unidad_medida',
-    'cantidad',
+    'referencia_interna', 'fecha_movimiento', 'fecha_registro_contable',
+    'tipo_movimiento', 'cae', 'tipo_justificante', 'unidad_medida', 'cantidad',
 ]
 
-# Longitudes máximas por campo
 FIELD_MAX_LENGTHS = {
-    'referencia_interna': 40,
-    'tipo_movimiento': 3,
-    'cae': 16,
-    'codigo_epigrafe': 10,
-    'codigo_nc': 15,
-    'nif_destinatario': 15,
-    'tipo_justificante': 2,
-    'num_justificante': 30,
-    'unidad_medida': 3,
+    'referencia_interna': 40, 'tipo_movimiento': 3, 'cae': 16,
+    'codigo_epigrafe': 10, 'codigo_nc': 15, 'nif_destinatario': 15,
+    'tipo_justificante': 2, 'num_justificante': 30, 'unidad_medida': 3,
 }
 
-# Campos de tipo fecha/datetime
 DATE_FIELDS = ['fecha_movimiento']
 DATETIME_FIELDS = ['fecha_registro_contable']
 FLOAT_FIELDS = ['graduacion', 'cantidad']
 
-# Cabeceras legibles
 CSV_HEADERS = {
     'referencia_interna': 'Numero Referencia Interna',
     'fecha_movimiento': 'Fecha Movimiento',
@@ -92,15 +63,10 @@ CSV_HEADERS = {
     'cantidad': 'Cantidad',
 }
 
-# Opciones para campos Selection
 ESTABLISHMENT_TYPES = [
-    ('FA', 'Fábrica'),
-    ('DE', 'Depósito Fiscal'),
-    ('EX', 'Exportador'),
-    ('IM', 'Importador'),
-    ('DT', 'Destinatario Registrado'),
-    ('OP', 'Operador Registrado'),
-    ('RE', 'Representante Fiscal'),
+    ('FA', 'Fábrica'), ('DE', 'Depósito Fiscal'), ('EX', 'Exportador'),
+    ('IM', 'Importador'), ('DT', 'Destinatario Registrado'),
+    ('OP', 'Operador Registrado'), ('RE', 'Representante Fiscal'),
 ]
 
 MOVEMENT_TYPES = [
@@ -117,26 +83,17 @@ MOVEMENT_TYPES = [
 ]
 
 UNIT_MEASURES = [
-    ('LTS', 'Litros'),
-    ('KGS', 'Kilogramos'),
-    ('UNI', 'Unidades'),
-    ('CAJ', 'Cajas'),
-    ('HL', 'Hectolitros'),
-    ('HPA', 'Hectolitros de alcohol puro'),
+    ('LTS', 'Litros'), ('KGS', 'Kilogramos'), ('UNI', 'Unidades'),
+    ('CAJ', 'Cajas'), ('HL', 'Hectolitros'), ('HPA', 'Hectolitros de alcohol puro'),
 ]
 
 JUSTIFICANT_TYPES = [
-    ('FA', 'Factura'),
-    ('AL', 'Albarán'),
-    ('DU', 'DUA'),
+    ('FA', 'Factura'), ('AL', 'Albarán'), ('DU', 'DUA'),
     ('DA', 'Documento Administrativo'),
-    ('ED', 'e-DA (Documento Administrativo Electrónico)'),
-    ('OT', 'Otro'),
+    ('ED', 'e-DA (Documento Administrativo Electrónico)'), ('OT', 'Otro'),
 ]
 
-CSV_PROFILES = [
-    ('IESA1CSV', 'Alcohol - IESA1CSV'),
-]
+CSV_PROFILES = [('IESA1CSV', 'Alcohol - IESA1CSV')]
 
 
 # ============================================================================
@@ -145,10 +102,8 @@ CSV_PROFILES = [
 
 def format_date(date_obj):
     """Formatea fecha según el formato SILICIE."""
-    if not date_obj:
-        return ''
-    if isinstance(date_obj, str):
-        return date_obj
+    if not date_obj or isinstance(date_obj, str):
+        return date_obj or ''
     return date_obj.strftime(DATE_FORMAT)
 
 
@@ -169,21 +124,17 @@ def format_float(value, decimals=2):
     if value is None:
         return ''
 
-    # Si es entero, no mostrar decimales
-    if float(value) == int(float(value)):
-        return str(int(float(value)))
+    float_value = float(value)
+    if float_value == int(float_value):
+        return str(int(float_value))
 
-    formatted = f"{float(value):.{decimals}f}"
-    if DECIMAL_SEPARATOR == ',':
-        formatted = formatted.replace('.', ',')
-    return formatted
+    formatted = f"{float_value:.{decimals}f}"
+    return formatted.replace('.', ',') if DECIMAL_SEPARATOR == ',' else formatted
 
 
 def truncate_field(value, max_length):
     """Trunca un campo de texto a la longitud máxima."""
-    if not value:
-        return ''
-    return str(value)[:max_length]
+    return str(value)[:max_length] if value else ''
 
 
 # ============================================================================
@@ -203,33 +154,32 @@ def validate_choice(value, valid_choices, field_name):
     """Valida que un valor esté en una lista de opciones válidas."""
     if value and value not in [code for code, label in valid_choices]:
         valid_codes = ', '.join([code for code, label in valid_choices])
-        raise ValidationError(
-            f"{field_name} '{value}' no válido. "
-            f"Debe ser uno de: {valid_codes}"
-        )
+        raise ValidationError(f"{field_name} '{value}' no válido. Debe ser uno de: {valid_codes}")
     return True
+
+
+def validate_movement_type(movement_type):
+    """Valida que el tipo de movimiento sea válido según SILICIE."""
+    if not movement_type:
+        return True  # Es opcional, puede estar vacío
+    return validate_choice(movement_type, MOVEMENT_TYPES, 'Tipo de Movimiento')
 
 
 def validate_row(row_data):
     """Valida una fila completa según las especificaciones SILICIE."""
     errors = []
 
-    # Validar campos requeridos
     for field_name in REQUIRED_FIELDS:
         if not row_data.get(field_name):
             errors.append(f"Campo '{field_name}' es obligatorio y está vacío.")
 
-    # Validar longitudes
     for field_name, max_len in FIELD_MAX_LENGTHS.items():
         value = row_data.get(field_name)
         if value and len(str(value)) > max_len:
-            errors.append(
-                f"Campo '{field_name}' excede longitud máxima ({max_len}): '{value}'"
-            )
+            errors.append(f"Campo '{field_name}' excede longitud máxima ({max_len}): '{value}'")
 
     if errors:
         raise ValidationError('\n'.join(errors))
-
     return True
 
 
@@ -240,15 +190,17 @@ def validate_row(row_data):
 def build_csv_row(row_data):
     """Construye una fila CSV con el orden exacto de campos."""
     row = []
-    missing_fields = []
+    missing_fields = [field for field in CSV_FIELDS if field not in row_data]
+
+    if missing_fields:
+        raise ValidationError(
+            f"Faltan los siguientes campos en los datos: {', '.join(missing_fields)}. "
+            f"Esto provoca desplazamientos en el CSV.\nContenido: {row_data}"
+        )
 
     for field_name in CSV_FIELDS:
-        if field_name not in row_data:
-            missing_fields.append(field_name)
-
         value = row_data.get(field_name, '')
 
-        # Aplicar formato según tipo de campo
         if field_name in DATE_FIELDS and value:
             value = format_date(value)
         elif field_name in DATETIME_FIELDS and value:
@@ -260,18 +212,11 @@ def build_csv_row(row_data):
 
         row.append(str(value) if value is not None else '')
 
-    if missing_fields:
-        raise ValidationError(
-            f"Faltan los siguientes campos en los datos: {', '.join(missing_fields)}. "
-            f"Esto provoca desplazamientos en el CSV.\nContenido: {row_data}"
-        )
-
     if len(row) != len(CSV_FIELDS):
         raise ValidationError(
             f"La fila generada tiene {len(row)} columnas pero se esperan {len(CSV_FIELDS)}."
             f"\nFila: {row}\nContenido: {row_data}"
         )
-
     return row
 
 
@@ -281,29 +226,18 @@ def build_csv_header():
 
 
 def generate_csv_content(rows_data, include_header=True):
-    """
-    Genera el contenido CSV completo.
-    rows_data: lista de dicts, cada uno representa una fila
-    Retorna: bytes del CSV
-    """
+    """Genera el contenido CSV completo. Retorna bytes del CSV."""
     output = io.StringIO()
-    writer = csv.writer(
-        output,
-        delimiter=SEPARATOR,
-        quotechar='"',
-        quoting=csv.QUOTE_MINIMAL
-    )
+    writer = csv.writer(output, delimiter=SEPARATOR, quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
     if include_header:
         writer.writerow(build_csv_header())
 
     for row_data in rows_data:
         validate_row(row_data)
-        csv_row = build_csv_row(row_data)
-        writer.writerow(csv_row)
+        writer.writerow(build_csv_row(row_data))
 
-    content = output.getvalue()
-    return content.encode(ENCODING)
+    return output.getvalue().encode(ENCODING)
 
 
 # ============================================================================
@@ -313,14 +247,19 @@ def generate_csv_content(rows_data, include_header=True):
 def get_establishment_type_choices():
     return ESTABLISHMENT_TYPES
 
+
 def get_movement_type_choices():
+    """Devuelve las opciones de tipos de movimiento SILICIE"""
     return MOVEMENT_TYPES
+
 
 def get_unit_measure_choices():
     return UNIT_MEASURES
 
+
 def get_justificant_type_choices():
     return JUSTIFICANT_TYPES
+
 
 def get_profile_choices():
     return CSV_PROFILES

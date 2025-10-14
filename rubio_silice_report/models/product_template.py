@@ -12,24 +12,50 @@ class ProductTemplate(models.Model):
         help='Código del producto para reportes SILICIE',
     )
 
+    _silicie_unidad_medida_stored = fields.Selection(
+        selection=lambda self: silicie_specs.get_unit_measure_choices(),
+        string='Unidad Medida SILICIE Storage',
+        help='Campo de almacenamiento interno',
+        copy=False,
+    )
+
     silicie_unidad_medida = fields.Selection(
         selection=lambda self: silicie_specs.get_unit_measure_choices(),
         string='Unidad Medida SILICIE',
         help='Unidad de medida estandarizada SILICIE',
-        default='UN',
+        compute='_compute_silicie_unidad_medida',
+        inverse='_inverse_silicie_unidad_medida',
+        store=False,
     )
+
+    @api.depends('_silicie_unidad_medida_stored')
+    def _compute_silicie_unidad_medida(self):
+        """Siempre devolver LTS si está vacío."""
+        for record in self:
+            record.silicie_unidad_medida = record._silicie_unidad_medida_stored or 'LTS'
+
+    def _inverse_silicie_unidad_medida(self):
+        """Guardar el valor cuando el usuario lo cambia."""
+        for record in self:
+            record._silicie_unidad_medida_stored = record.silicie_unidad_medida
+
+    @api.model
+    def default_get(self, fields_list):
+        """Forzar valores predeterminados para productos nuevos."""
+        res = super().default_get(fields_list)
+
+        # Forzar LTS para productos nuevos
+        if 'silicie_unidad_medida' in fields_list or '_silicie_unidad_medida_stored' in fields_list:
+            res['_silicie_unidad_medida_stored'] = 'LTS'
+            res['silicie_unidad_medida'] = 'LTS'
+
+        return res
 
     # Campos específicos para alcohol (IESA1CSV)
     silicie_graduacion = fields.Float(
         string='Graduación Alcohólica',
         help='Graduación alcohólica para productos de alcohol',
         digits=(5, 2),
-    )
-
-    numero_silice = fields.Char(
-        string='Número SILICIE',
-        size=20,
-        help='Número identificativo SILICIE para el producto'
     )
 
     silicie_codigo_nc = fields.Char(

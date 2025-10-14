@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2025 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <record id="sale_order_form_view_silicie" model="ir.ui.view">
+        <field name="name">sale.order.form.silicie</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <field name="payment_term_id" position="after">
+                <field name="silicie_movement_type"/>
+            </field>
+        </field>
+    </record>
+</odoo>
+

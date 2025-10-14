@@ -13,8 +13,7 @@
                         <group string="Configuración Básica SILICIE">
                             <field name="silicie_codigo_producto"/>
                             <field name="silicie_codigo_nc"/>
-                            <field name="silicie_unidad_medida"/>
-                            <field name="numero_silice"/>
+                            <field name="silicie_unidad_medida" default="LTS"/>
                         </group>
                         <group string="Alcohol (IESA1CSV)">
                             <field name="silicie_graduacion"/>

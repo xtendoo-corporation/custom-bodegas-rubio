@@ -128,6 +128,8 @@ class SiliceReportWizard(models.TransientModel):
         """Elimina caracteres prohibidos del texto para SILICIE."""
         if not text:
             return ''
+        # Eliminar espacios al principio y al final
+        text = text.strip()
         # Eliminar los caracteres: , ; :
         for char in [',', ';', ':']:
             text = text.replace(char, '')

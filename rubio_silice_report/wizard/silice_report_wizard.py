@@ -124,6 +124,15 @@ class SiliceReportWizard(models.TransientModel):
         # Si no está marcado "Todos" y no hay tipo seleccionado, devolver todos
         return pickings
 
+    def _sanitize_text(self, text):
+        """Elimina caracteres prohibidos del texto para SILICIE."""
+        if not text:
+            return ''
+        # Eliminar los caracteres: , ; :
+        for char in [',', ';', ':']:
+            text = text.replace(char, '')
+        return text
+
     def _get_silice_number(self, picking):
         """Obtiene el número de referencia para el picking."""
         # Usar el número del albarán (picking.name) como referencia principal
@@ -214,11 +223,11 @@ class SiliceReportWizard(models.TransientModel):
                     'codigo_epigrafe': codigo_epigrafe,
                     'codigo_nc': product_mapping.get('codigo_nc', ''),
                     'nif_destinatario': nif_destinatario,
-                    'razon_social': partner.name or '',  # Añadir razón social del partner del albarán
+                    'razon_social': self._sanitize_text(partner.name),
                     'tipo_justificante': tipo_justificante,
                     'num_justificante': num_justificante,
                     'unidad_medida': product_mapping.get('unidad_medida', default_um),
-                    'descripcion_producto': product.name or '',  # Usar solo el nombre del producto sin código
+                    'descripcion_producto': self._sanitize_text(product.name),
                     'graduacion': product_mapping.get('graduacion', ''),
                     'tipo_envase': 'ADO1',  # Valor predeterminado para tipo de envase
                     'cantidad': cantidad,

@@ -64,14 +64,15 @@ class SiliceReportWizard(models.TransientModel):
         """Valida que la configuración SILICIE esté completa."""
         ICP = self.env['ir.config_parameter'].sudo()
 
-        cae = ICP.get_param('rubio_silice_report.silicie_cae')
-        if not cae:
-            raise UserError(_(
-                'Debe configurar el CAE en:\n'
-                'Ajustes → Inventario → SILICIE'
-            ))
+        # Eliminar referencia a cae
+        # cae = ICP.get_param('rubio_silice_report.silicie_cae')
+        # if not cae:
+        #     raise UserError(_(
+        #         'Debe configurar el CAE en:\n'
+        #         'Ajustes → Inventario → SILICIE'
+        #     ))
 
-        silicie_specs.validate_cae(cae)
+        # silicie_specs.validate_cae(cae)
         return True
 
     def _validate_dates(self):
@@ -178,9 +179,10 @@ class SiliceReportWizard(models.TransientModel):
     def _build_csv_rows(self, pickings):
         """Construye las filas de datos para el CSV SILICIE."""
         ICP = self.env['ir.config_parameter'].sudo()
-        cae = ICP.get_param('rubio_silice_report.silicie_cae', '')
-        codigo_epigrafe = ICP.get_param('rubio_silice_report.silicie_codigo_epigrafe', 'A3')
-        establishment_type = ICP.get_param('rubio_silice_report.silicie_establishment_type', '')
+        # Eliminar referencia a cae
+        # cae = ICP.get_param('rubio_silice_report.silicie_cae', '')
+        # codigo_epigrafe = ICP.get_param('rubio_silice_report.silicie_codigo_epigrafe', 'A3')
+        # establishment_type = ICP.get_param('rubio_silice_report.silicie_establishment_type', '')
         default_um = ICP.get_param('rubio_silice_report.silicie_default_um', 'LTS')
 
         fecha_presentacion = datetime.now()
@@ -196,7 +198,7 @@ class SiliceReportWizard(models.TransientModel):
             partner = picking.partner_id
             nif_destinatario = partner.vat or ''
             num_justificante = picking.name
-            tipo_justificante = 'AL'  # Por defecto Albarán
+
 
             # Obtener número de sílice del picking usando el método existente
             silice_number_base = self._get_silice_number(picking)
@@ -208,12 +210,20 @@ class SiliceReportWizard(models.TransientModel):
                     missing_products.add(f"{product.id} - {product.display_name}")
                     continue
 
-                # Incrementar contador global
                 global_line_counter += 1
 
-                # Usar el número de sílice base con el contador global
                 referencia_interna = f"{silice_number_base}-{global_line_counter}"
-                cantidad = move_line.quantity if move_line.quantity is not None else 0.0
+                numero_envases = int(move_line.quantity) if move_line.quantity is not None else 0
+                capacidad_envase = product.product_tmpl_id.silicie_capacidad_envase if product.product_tmpl_id.silicie_capacidad_envase is not None else 0
+                cantidad = numero_envases * capacidad_envase
+
+                # Determinar el tipo de justificante según el tipo de documento identificativo del cliente
+                if partner.silicie_document_type == '1':
+                    tipo_justificante = 'J01'
+                elif partner.silicie_document_type == '3':
+                    tipo_justificante = 'J03'
+                else:
+                    tipo_justificante = ''
 
                 # Construir fila directamente campo a campo en el orden exacto del CSV
                 row_data = {
@@ -221,20 +231,29 @@ class SiliceReportWizard(models.TransientModel):
                     'fecha_movimiento': fecha_asiento,
                     'fecha_registro_contable': fecha_presentacion,
                     'tipo_movimiento': movement_type,
-                    'cae': cae,
-                    'codigo_epigrafe': codigo_epigrafe,
                     'codigo_nc': product_mapping.get('codigo_nc', ''),
                     'nif_destinatario': nif_destinatario,
                     'razon_social': self._sanitize_text(partner.name),
+                    'tipo_documento_identificativo': partner.silicie_document_type or '',
                     'tipo_justificante': tipo_justificante,
-                    'num_justificante': num_justificante,
+                    'num_justificante': picking.numero_justificante or picking.name,
+                    'numero_documento_identificativo': picking.num_documento_identificativo or nif_destinatario,
+                    'cae_seed_number': partner.cae_seed_number or '',
+                    'clave_silicie': product.product_tmpl_id.clave_silicie or '',
+                    'numero_envases': numero_envases,
                     'unidad_medida': product_mapping.get('unidad_medida', default_um),
-                    'descripcion_producto': self._sanitize_text(product.name),
+                    'descripcion_producto': self._sanitize_text(product.product_tmpl_id.silicie_descripcion_articulo) if product.product_tmpl_id.silicie_descripcion_articulo else self._sanitize_text(product.name),
                     'graduacion': product_mapping.get('graduacion', ''),
-                    'tipo_envase': 'ADO1',  # Valor predeterminado para tipo de envase
+                    'tipo_envase': 'ADO1',
                     'cantidad': cantidad,
+                    'codigo_epigrafe': 'A0',
+                    'capacidad_envase': capacidad_envase,
+                    'densidad': '',
+                    'alcohol_puro': round((cantidad * float(product_mapping.get('graduacion', 0))) / 100, 2) if product_mapping.get('graduacion', '') else 0,
+                    'indicador_marcas_fiscales': '',
+                    'observaciones': picking.observaciones_entrega or '',
+                    'producto': product.display_name,
                 }
-
                 rows_data.append(row_data)
 
         if missing_products:
@@ -248,10 +267,9 @@ class SiliceReportWizard(models.TransientModel):
     def _generate_filename(self):
         """Genera el nombre del fichero CSV."""
         ICP = self.env['ir.config_parameter'].sudo()
-        cae = ICP.get_param('rubio_silice_report.silicie_cae', 'CAE')
 
         timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-        filename = f"{cae}_{self.csv_profile}_{timestamp}.csv"
+        filename = f"{self.csv_profile}_{timestamp}.csv"
 
         return filename
 

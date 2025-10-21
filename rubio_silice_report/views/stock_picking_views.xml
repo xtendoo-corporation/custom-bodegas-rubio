@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_silice_report" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.silice.report</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='silice_sequence']" position="after">
+                <field name="num_documento_identificativo" string="Número Documento Identificativo"/>
+            </xpath>
+            <xpath expr="//field[@name='origin']" position="after">
+                <field name="observaciones_entrega" string="Observaciones"/>
+            </xpath>
+            <xpath expr="//field[@name='num_documento_identificativo']" position="after">
+                <field name="numero_justificante" string="Numero Justificante"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

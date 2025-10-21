@@ -28,6 +28,21 @@ class ProductTemplate(models.Model):
         store=False,
     )
 
+    clave_silicie = fields.Char(
+        string='Clave SILICIE',
+        help='Clave para SILICIE. Rellenar manualmente si aplica.'
+    )
+
+    silicie_capacidad_envase = fields.Float(
+        string='Capacidad Envase (Volumen)',
+        help='Volumen del envase para SILICIE, en litros o la unidad que corresponda.'
+    )
+
+    silicie_descripcion_articulo = fields.Char(
+        string='Descripción Artículo',
+        help='Descripción manual del artículo para exportar en el CSV SILICIE.'
+    )
+
     @api.depends('_silicie_unidad_medida_stored')
     def _compute_silicie_unidad_medida(self):
         """Siempre devolver LTS si está vacío."""

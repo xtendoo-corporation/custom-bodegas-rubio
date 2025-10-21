@@ -22,22 +22,47 @@ DECIMAL_SEPARATOR = '.'
 DATE_FORMAT = '%d/%m/%Y'
 
 CSV_FIELDS = [
-    'referencia_interna', 'fecha_movimiento', 'fecha_registro_contable',
-    'tipo_movimiento', 'cae', 'nif_destinatario', 'razon_social',
-    'tipo_justificante', 'num_justificante', 'unidad_medida', 'codigo_nc',
-    'codigo_epigrafe', 'descripcion_producto', 'graduacion', 'tipo_envase',
+    'referencia_interna',
+    'numero_asiento_previo',
+    'numero_asiento_previo_reintroduccion',
+    'fecha_movimiento',
+    'fecha_registro_contable',
+    'tipo_movimiento',
+    'tipo_justificante',
+    'regimen_fiscal',
+    'nif_destinatario',
+    'numero_documento_identificativo',
+    'num_justificante',
+    'razon_social',
+    'cae_seed_number',
+    'codigo_epigrafe',
+    'codigo_nc',
+    'clave_silicie',
     'cantidad',
+    'unidad_medida',
+    'producto',
+    'descripcion_producto',
+    'densidad',
+    'graduacion',
+    'alcohol_puro',
+    'tipo_envase',
+    'capacidad_envase',
+    'numero_envases',
+    'indicador_marcas_fiscales',
+    'observaciones',
+    'regimen_fiscal',
 ]
 
 REQUIRED_FIELDS = [
     'referencia_interna', 'fecha_movimiento', 'fecha_registro_contable',
-    'tipo_movimiento', 'cae', 'tipo_justificante', 'unidad_medida', 'cantidad',
+    'tipo_movimiento', 'tipo_justificante', 'unidad_medida', 'cantidad',
 ]
 
 FIELD_MAX_LENGTHS = {
-    'referencia_interna': 40, 'tipo_movimiento': 3, 'cae': 16,
+    'referencia_interna': 40, 'tipo_movimiento': 3,
     'codigo_epigrafe': 10, 'codigo_nc': 15, 'nif_destinatario': 15,
-    'tipo_justificante': 2, 'num_justificante': 30, 'unidad_medida': 3,
+    'tipo_justificante': 3,  # Cambiado de 2 a 3
+    'num_justificante': 30, 'unidad_medida': 3,
 }
 
 DATE_FIELDS = ['fecha_movimiento']
@@ -46,21 +71,36 @@ FLOAT_FIELDS = ['graduacion', 'cantidad']
 
 CSV_HEADERS = {
     'referencia_interna': 'Numero Referencia Interna',
+    'numero_asiento_previo': 'Numero Asiento Previo',  # NUEVO
+    'numero_asiento_previo_reintroduccion': 'Numero Asiento Previo Reintroduccion',  # NUEVO
     'fecha_movimiento': 'Fecha Movimiento',
     'fecha_registro_contable': 'Fecha Registro Contable',
+    'tipo_justificante': 'Tipo Documento Identificativo',
+    'regimen_fiscal': 'Regimen Fiscal',
     'tipo_movimiento': 'Tipo Movimiento',
-    'cae': 'CAE',
     'nif_destinatario': 'NIF Destinatario',
-    'razon_social': 'Razon Social',
-    'tipo_justificante': 'Tipo Justificante',
+
+    'tipo_justificante': 'Tipo Documento Identificativo',
     'num_justificante': 'Numero Justificante',
-    'unidad_medida': 'Unidad Medida',
-    'codigo_nc': 'Código NC',
-    'codigo_epigrafe': 'Código Epígrafe',
-    'descripcion_producto': 'Descripcion Producto',
-    'graduacion': 'Graduacion',
-    'tipo_envase': 'Tipo Envase',
+    'numero_documento_identificativo': 'Numero Documento Identificativo',
+    'razon_social': 'Razon Social',
+    'cae_seed_number': 'CAE/Numero SEED',
+    'codigo_epigrafe': 'Codigo Epigrafe',
+    'codigo_nc': 'Codigo NC',
+    'clave_silicie': 'Clave',
     'cantidad': 'Cantidad',
+    'unidad_medida': 'Unidad Medida',
+    'producto': 'Producto',
+    'descripcion_producto': 'Descripcion Producto',
+    'densidad': 'Densidad',
+    'graduacion': 'Graduacion',
+    'alcohol_puro': 'Alcohol Puro',
+    'tipo_envase': 'Tipo Envase',
+    'capacidad_envase': 'Capacidad Envase',
+    'numero_envases': 'Numero Envases',
+    'indicador_marcas_fiscales': 'Indicador Marcas Fiscales',
+    'observaciones': 'Observaciones',
+    'regimen_fiscal': 'Regimen Fiscal',  # Nueva cabecera
 }
 
 ESTABLISHMENT_TYPES = [
@@ -141,14 +181,6 @@ def truncate_field(value, max_length):
 # FUNCIONES DE VALIDACIÓN
 # ============================================================================
 
-def validate_cae(cae):
-    """Valida formato del CAE."""
-    if not cae:
-        raise ValidationError("El CAE es obligatorio para exportar a SILICIE.")
-    if len(cae) > 16:
-        raise ValidationError(f"El CAE '{cae}' supera la longitud máxima de 16 caracteres.")
-    return True
-
 
 def validate_choice(value, valid_choices, field_name):
     """Valida que un valor esté en una lista de opciones válidas."""
@@ -190,26 +222,25 @@ def validate_row(row_data):
 def build_csv_row(row_data):
     """Construye una fila CSV con el orden exacto de campos."""
     row = []
-    missing_fields = [field for field in CSV_FIELDS if field not in row_data]
-
-    if missing_fields:
-        raise ValidationError(
-            f"Faltan los siguientes campos en los datos: {', '.join(missing_fields)}. "
-            f"Esto provoca desplazamientos en el CSV.\nContenido: {row_data}"
-        )
-
     for field_name in CSV_FIELDS:
-        value = row_data.get(field_name, '')
-
-        if field_name in DATE_FIELDS and value:
-            value = format_date(value)
-        elif field_name in DATETIME_FIELDS and value:
-            value = format_datetime(value)
-        elif field_name in FLOAT_FIELDS:
-            value = format_float(value if value != '' else 0.0, 2)
-        elif field_name in FIELD_MAX_LENGTHS:
-            value = truncate_field(value, FIELD_MAX_LENGTHS[field_name])
-
+        if field_name == 'regimen_fiscal':
+            tipo_mov = row_data.get('tipo_movimiento', '')
+            if tipo_mov == 'A08':
+                value = '4'
+            elif tipo_mov == 'A10':
+                value = '3'
+            else:
+                value = ''
+        else:
+            value = row_data.get(field_name, '')
+            if field_name in DATE_FIELDS and value:
+                value = format_date(value)
+            elif field_name in DATETIME_FIELDS and value:
+                value = format_datetime(value)
+            elif field_name in FLOAT_FIELDS:
+                value = format_float(value if value != '' else 0.0, 2)
+            elif field_name in FIELD_MAX_LENGTHS:
+                value = truncate_field(value, FIELD_MAX_LENGTHS[field_name])
         row.append(str(value) if value is not None else '')
 
     if len(row) != len(CSV_FIELDS):

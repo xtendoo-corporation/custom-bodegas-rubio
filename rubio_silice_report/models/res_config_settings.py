@@ -8,11 +8,6 @@ class ResConfigSettings(models.TransientModel):
     _inherit = 'res.config.settings'
 
     # Parámetros SILICIE persistentes vía ir.config_parameter
-    silicie_cae = fields.Char(
-        string='CAE (Código de Actividad Empresarial)',
-        help='Código de Actividad Empresarial del establecimiento SILICIE',
-        config_parameter='rubio_silice_report.silicie_cae',
-    )
 
     silicie_establishment_type = fields.Selection(
         selection=lambda self: silicie_specs.get_establishment_type_choices(),

@@ -10,14 +10,6 @@
             <xpath expr="//app[@name='stock']" position="after">
                 <app string="SILICIE 2.0" name="rubio_silice_report">
                     <block title="Configuración SILICIE 2.0">
-                        <setting>
-                            <field name="silicie_cae" required="1"/>
-                            <div class="content-group">
-                                <div class="text-muted">
-                                    Código de Actividad Empresarial del establecimiento SILICIE (máx. 16 caracteres)
-                                </div>
-                            </div>
-                        </setting>
 
                         <setting>
                             <field name="silicie_establishment_type"/>

@@ -12,3 +12,12 @@ class ResPartner(models.Model):
         string='Tipo de Movimiento SILICIE',
         help='Tipo de movimiento SILICIE que se aplicará por defecto a este cliente/proveedor en las exportaciones.',
     )
+    silicie_document_type = fields.Selection(
+        selection=[('1', '1'), ('3', '3')],
+        string='Tipo Documento Identificativo',
+        help='Tipo de documento identificativo para SILICIE: 1 o 3.'
+    )
+    cae_seed_number = fields.Char(
+        string='CAE/Numero SEED',
+        help='Número CAE o SEED para SILICIE. Rellenar manualmente si aplica.'
+    )

@@ -7,6 +7,7 @@
     "category": "Inventory/Reporting",
     "license": "LGPL-3",
     "depends": [
+        "product",
         "stock",
         "sale",
         "sale_stock",
@@ -21,6 +22,7 @@
         "views/sale_order_views.xml",
         "views/silice_report_wizard_views.xml",
         "views/menuitems.xml",
+        "views/stock_picking_views.xml",
     ],
     "installable": True,
     "application": False,

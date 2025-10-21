@@ -1,37 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright 2025 Bodegas Rubio -->
-<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
 <odoo>
-    <record id="product_template_form_view_silicie" model="ir.ui.view">
+    <record id="view_product_template_form_silicie" model="ir.ui.view">
         <field name="name">product.template.form.silicie</field>
         <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="inherit_id" ref="product.product_template_only_form_view"/>
         <field name="arch" type="xml">
-            <notebook position="inside">
-                <page string="SILICIE" name="silicie_config">
-                    <group>
-                        <group string="Configuración Básica SILICIE">
+            <xpath expr="//notebook" position="inside">
+                <page string="SILICIE" name="silicie_page">
+                    <group name="silicie_group">
+                        <group>
                             <field name="silicie_codigo_producto"/>
-                            <field name="silicie_codigo_nc"/>
-                            <field name="silicie_unidad_medida" default="LTS"/>
-                        </group>
-                        <group string="Alcohol (IESA1CSV)">
+                            <field name="silicie_unidad_medida"/>
                             <field name="silicie_graduacion"/>
+                            <field name="silicie_descripcion_articulo"/>
+                        </group>
+                        <group>
+                            <field name="silicie_codigo_nc"/>
+                            <field name="clave_silicie"/>
+                            <field name="silicie_capacidad_envase"/>
+
                         </group>
                     </group>
                 </page>
-            </notebook>
-        </field>
-    </record>
-
-    <record id="product_template_tree_view_silicie" model="ir.ui.view">
-        <field name="name">product.template.tree.silicie</field>
-        <field name="model">product.template</field>
-        <field name="inherit_id" ref="product.product_template_tree_view"/>
-        <field name="arch" type="xml">
-            <field name="list_price" position="after">
-                <field name="silicie_codigo_producto" optional="hide"/>
-            </field>
+            </xpath>
         </field>
     </record>
 </odoo>

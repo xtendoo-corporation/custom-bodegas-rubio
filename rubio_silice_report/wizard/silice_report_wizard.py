@@ -146,20 +146,12 @@ class SiliceReportWizard(models.TransientModel):
         """
         Determina el tipo de movimiento SILICIE según el picking.
         Prioridad:
-        1. Campo silicie_movement_type del picking (copiado del pedido de venta)
-        2. Campo silicie_movement_type del cliente
-        3. Valor por defecto A08
+        1. Campo silicie_movement_type del cliente
+        2. Valor por defecto A08
         """
-        # Prioridad 1: Si el picking tiene tipo de movimiento asignado (copiado del pedido), usar ese
-        if picking.silicie_movement_type:
-            return picking.silicie_movement_type
-
-        # Prioridad 2: Si el partner tiene un tipo de movimiento asignado, usar ese
         partner = picking.partner_id
-        if partner and partner.silicie_movement_type:
+        if partner and hasattr(partner, 'silicie_movement_type') and partner.silicie_movement_type:
             return partner.silicie_movement_type
-
-        # Prioridad 3: Usar A08 como valor por defecto
         return 'A08'
 
     def _get_product_mapping(self, product_id):

@@ -21,3 +21,8 @@ class ResPartner(models.Model):
         string='CAE/Numero SEED',
         help='Número CAE o SEED para SILICIE. Rellenar manualmente si aplica.'
     )
+    silicie_regimen_fiscal = fields.Selection(
+        selection=[('3', '3'), ('4', '4')],
+        string='Régimen Fiscal SILICIE',
+        help='Selecciona el régimen fiscal para SILICIE: 3 o 4.'
+    )

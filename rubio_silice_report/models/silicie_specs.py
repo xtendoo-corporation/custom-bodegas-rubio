@@ -50,7 +50,6 @@ CSV_FIELDS = [
     'numero_envases',
     'indicador_marcas_fiscales',
     'observaciones',
-    'regimen_fiscal',
 ]
 
 REQUIRED_FIELDS = [
@@ -100,7 +99,6 @@ CSV_HEADERS = {
     'numero_envases': 'Numero Envases',
     'indicador_marcas_fiscales': 'Indicador Marcas Fiscales',
     'observaciones': 'Observaciones',
-    'regimen_fiscal': 'Regimen Fiscal',  # Nueva cabecera
 }
 
 ESTABLISHMENT_TYPES = [
@@ -224,13 +222,7 @@ def build_csv_row(row_data):
     row = []
     for field_name in CSV_FIELDS:
         if field_name == 'regimen_fiscal':
-            tipo_mov = row_data.get('tipo_movimiento', '')
-            if tipo_mov == 'A08':
-                value = '4'
-            elif tipo_mov == 'A10':
-                value = '3'
-            else:
-                value = ''
+            value = row_data.get('regimen_fiscal', '')
         else:
             value = row_data.get(field_name, '')
             if field_name in DATE_FIELDS and value:

@@ -169,17 +169,14 @@ class SiliceReportWizard(models.TransientModel):
         }
 
     def _build_csv_rows(self, pickings):
-        """Construye las filas de datos para el CSV SILICIE."""
+        """Construye las filas de datos para el CSV SILICIE (solo productos SILICIE)."""
         ICP = self.env['ir.config_parameter'].sudo()
-        # Eliminar referencia a cae
-        # cae = ICP.get_param('rubio_silice_report.silicie_cae', '')
-        # codigo_epigrafe = ICP.get_param('rubio_silice_report.silicie_codigo_epigrafe', 'A3')
-        # establishment_type = ICP.get_param('rubio_silice_report.silicie_establishment_type', '')
         default_um = ICP.get_param('rubio_silice_report.silicie_default_um', 'LTS')
 
         fecha_presentacion = datetime.now()
         rows_data = []
         missing_products = set()
+        silicie_count = 0
 
         for picking in pickings:
             global_line_counter = 0  # Contador global para todas las líneas
@@ -191,23 +188,37 @@ class SiliceReportWizard(models.TransientModel):
             nif_destinatario = partner.vat or ''
             num_justificante = picking.name
 
-
-            # Obtener número de sílice del picking usando el método existente
             silice_number_base = self._get_silice_number(picking)
 
             for move_line in picking.move_line_ids.filtered(lambda ml: ml.quantity > 0):
                 product = move_line.product_id
+                if not product.silicie_codigo_producto:
+                    continue  # Excluir productos que no son SILICIE
+                silicie_count += 1
                 product_mapping = self._get_product_mapping(product.id)
-                if not product_mapping:
-                    missing_products.add(f"{product.id} - {product.display_name}")
-                    continue
-
                 global_line_counter += 1
 
                 referencia_interna = f"{silice_number_base}-{global_line_counter}"
                 numero_envases = int(move_line.quantity) if move_line.quantity is not None else 0
                 capacidad_envase = product.product_tmpl_id.silicie_capacidad_envase if product.product_tmpl_id.silicie_capacidad_envase is not None else 0
                 cantidad = numero_envases * capacidad_envase
+
+                campos_obligatorios = {
+                    'Tipo Documento Identificativo': partner.silicie_document_type,
+                    'Numero SEED': partner.cae_seed_number,
+                    'Codigo NC': product_mapping.get('codigo_nc', ''),
+                    'Unidad de Medida': product_mapping.get('unidad_medida', ''),
+                    'Graduacion': product_mapping.get('graduacion', ''),
+                    'Clave SILICIE': product.product_tmpl_id.clave_silicie,
+                    'Capacidad Envase': capacidad_envase,
+                    'Regimen Fiscal': partner.silicie_regimen_fiscal,
+                }
+                for campo, valor in campos_obligatorios.items():
+                    if valor in (None, '', False):
+                        raise UserError(_(
+                            "El campo obligatorio '%s' está vacío en el cliente '%s' o producto '%s'.\nPor favor, complétalo en la pestaña SILICIE antes de exportar." % (
+                                campo, partner.name, product.display_name)
+                        ))
 
                 # Determinar el tipo de justificante según el tipo de documento identificativo del cliente
                 if partner.silicie_document_type == '1':
@@ -216,8 +227,11 @@ class SiliceReportWizard(models.TransientModel):
                     tipo_justificante = 'J03'
                 else:
                     tipo_justificante = ''
+                if not tipo_justificante:
+                    raise UserError(_(
+                        "El campo obligatorio 'Tipo de Justificante' no se puede calcular para el cliente '%s'.\nPor favor, revisa el tipo de documento identificativo en la pestaña SILICIE." % partner.name
+                    ))
 
-                # Construir fila directamente campo a campo en el orden exacto del CSV
                 row_data = {
                     'referencia_interna': referencia_interna,
                     'fecha_movimiento': fecha_asiento,
@@ -228,6 +242,7 @@ class SiliceReportWizard(models.TransientModel):
                     'razon_social': self._sanitize_text(partner.name),
                     'tipo_documento_identificativo': partner.silicie_document_type or '',
                     'tipo_justificante': tipo_justificante,
+                    'regimen_fiscal': partner.silicie_regimen_fiscal,
                     'num_justificante': picking.numero_justificante or picking.name,
                     'numero_documento_identificativo': picking.num_documento_identificativo or nif_destinatario,
                     'cae_seed_number': partner.cae_seed_number or '',
@@ -245,15 +260,26 @@ class SiliceReportWizard(models.TransientModel):
                     'indicador_marcas_fiscales': '',
                     'observaciones': picking.observaciones_entrega or '',
                     'producto': product.display_name,
+
                 }
                 rows_data.append(row_data)
 
-        if missing_products:
+                # Log temporal para depuración del valor de régimen fiscal
+                self.env['ir.logging'].sudo().create({
+                    'name': 'SILICIE Regimen Fiscal Debug',
+                    'type': 'server',
+                    'dbname': self.env.cr.dbname,
+                    'level': 'DEBUG',
+                    'message': f"Partner ID: {partner.id} | Partner Name: {partner.name} | silicie_regimen_fiscal: {partner.silicie_regimen_fiscal}",
+                    'path': 'rubio_silice_report',
+                    'func': '_build_csv_rows',
+                    'line': '1',
+                })
+
+        if silicie_count == 0:
             raise UserError(_(
-                'Los siguientes productos no tienen configuración SILICIE completa:\n\n%s\n\n'
-                'Configure los campos SILICIE directamente en cada producto:\n'
-                'Inventario → Productos → [Producto] → Pestaña "SILICIE"'
-            ) % '\n'.join(sorted(missing_products)))
+                'No hay productos SILICIE para exportar en el rango de fechas seleccionado.'
+            ))
         return rows_data
 
     def _generate_filename(self):

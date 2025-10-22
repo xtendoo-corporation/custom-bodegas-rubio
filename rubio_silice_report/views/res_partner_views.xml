@@ -5,15 +5,17 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//page[@name='sales_purchases']" position="inside">
-                <group string="SILICIE" name="silicie_group">
-                    <field name="silicie_movement_type"/>
-                    <field name="cae_seed_number"/>
-                </group>
-            </xpath>
-            <xpath expr="//field[@name='vat']" position="after">
-                <field name="silicie_document_type"/>
-                <field name="cae_seed_number"/>
+            <xpath expr="//notebook" position="inside">
+                <page string="SILICIE" name="silicie_page">
+                    <group name="silicie_group">
+                        <group>
+                            <field name="silicie_movement_type"/>
+                            <field name="silicie_document_type" string="Tipo Documento Identificativo"/>
+                            <field name="cae_seed_number" string="CAE/Numero SEED"/>
+                            <field name="silicie_regimen_fiscal" string="Régimen Fiscal SILICIE"/>
+                        </group>
+                    </group>
+                </page>
             </xpath>
         </field>
     </record>

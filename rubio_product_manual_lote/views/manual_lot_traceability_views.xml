@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_order_line_manual_lot_traceability_tree" model="ir.ui.view">
+        <field name="name">sale.order.line.manual.lot.traceability.tree</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+            <list string="Trazabilidad lotes manuales" create="false" delete="false">
+                <field name="order_date"/>
+                <field name="order_id"/>
+                <field name="order_partner_id"/>
+                <field name="partner_name"/>
+                <field name="partner_vat"/>
+                <field name="partner_email"/>
+                <field name="partner_phone"/>
+                <field name="partner_mobile"/>
+                <field name="partner_street"/>
+                <field name="partner_street2" optional="hide"/>
+                <field name="partner_zip"/>
+                <field name="partner_city"/>
+                <field name="partner_state_id"/>
+                <field name="partner_country_id"/>
+                <field name="product_id"/>
+                <field name="name" optional="hide"/>
+                <field name="manual_lot"/>
+                <field name="product_uom_qty" string="Cantidad"/>
+                <field name="state"/>
+            </list>
+        </field>
+    </record>
+    <record id="view_sale_order_line_manual_lot_traceability_search" model="ir.ui.view">
+        <field name="name">sale.order.line.manual.lot.traceability.search</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+            <search string="Trazabilidad lotes manuales">
+                <field name="order_id"/>
+                <field name="order_partner_id"/>
+                <field name="product_id"/>
+                <field name="manual_lot"/>
+                <field name="order_date"/>
+                <filter name="filter_confirmed" string="Pedidos confirmados" domain="[('state', 'in', ('sale', 'done'))]"/>
+                <separator/>
+                <filter name="group_by_product" string="Producto" context="{'group_by': 'product_id'}"/>
+                <filter name="group_by_manual_lot" string="Lote manual" context="{'group_by': 'manual_lot'}"/>
+                <filter name="group_by_customer" string="Cliente" context="{'group_by': 'order_partner_id'}"/>
+                <filter name="group_by_order_date" string="Fecha pedido" context="{'group_by': 'order_date:day'}"/>
+            </search>
+        </field>
+    </record>
+    <record id="view_sale_order_line_manual_lot_traceability_pivot" model="ir.ui.view">
+        <field name="name">sale.order.line.manual.lot.traceability.pivot</field>
+        <field name="model">sale.order.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Trazabilidad lotes manuales" disable_linking="false">
+                <field name="product_id" type="row"/>
+                <field name="manual_lot" type="row"/>
+                <field name="order_partner_id" type="col"/>
+                <field name="order_date" interval="month" type="col"/>
+                <field name="product_uom_qty" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="action_manual_lot_traceability_report" model="ir.actions.act_window">
+        <field name="name">Trazabilidad lotes manuales</field>
+        <field name="res_model">sale.order.line</field>
+        <field name="view_mode">list,pivot,form</field>
+        <field name="search_view_id" ref="view_sale_order_line_manual_lot_traceability_search"/>
+        <field name="domain">[("display_type", "=", False), ("manual_lot", "!=", False), ("manual_lot", "!=", "")]</field>
+        <field name="context">{'search_default_filter_confirmed': 1}</field>
+    </record>
+
+    <record id="action_manual_lot_traceability_report_view_list" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_sale_order_line_manual_lot_traceability_tree"/>
+        <field name="act_window_id" ref="action_manual_lot_traceability_report"/>
+    </record>
+
+    <record id="action_manual_lot_traceability_report_view_pivot" model="ir.actions.act_window.view">
+        <field name="sequence" eval="2"/>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_sale_order_line_manual_lot_traceability_pivot"/>
+        <field name="act_window_id" ref="action_manual_lot_traceability_report"/>
+    </record>
+    <menuitem
+        id="menu_manual_lot_traceability_report"
+        name="Trazabilidad lotes manuales"
+        parent="sale.menu_sale_report"
+        action="action_manual_lot_traceability_wizard"
+        groups="sales_team.group_sale_manager"
+        sequence="95"
+    />
+</odoo>

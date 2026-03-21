@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <!--
+        Hereda el informe de pedido de venta para mostrar el Lote Manual
+        dentro de la celda de descripcion (td_name), debajo del nombre del producto.
+        Este enfoque evita conflictos de columnas con otros modulos.
+    -->
+    <template
+        id="report_saleorder_document_manual_lot"
+        inherit_id="sale.report_saleorder_document"
+    >
+        <xpath expr="//td[@name='td_name']" position="inside">
+            <t t-if="not line.display_type and line.manual_lot">
+                <br/>
+                <small>
+                    <strong>Lote: </strong>
+                    <span t-esc="line.manual_lot"/>
+                </small>
+            </t>
+        </xpath>
+    </template>
+</odoo>

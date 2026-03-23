@@ -9,6 +9,7 @@
                     <field name="date_from"/>
                     <field name="date_to"/>
                     <field name="product_id" options="{'no_create': True}"/>
+                    <field name="lot_number"/>
                 </group>
                 <footer>
                     <button

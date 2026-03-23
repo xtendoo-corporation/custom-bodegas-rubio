@@ -14,6 +14,7 @@ class ManualLotTraceabilityWizard(models.TransientModel):
 	date_from = fields.Date(string="Fecha desde")
 	date_to = fields.Date(string="Fecha hasta")
 	product_id = fields.Many2one("product.product", string="Producto")
+	lot_number = fields.Char(string="Numero de lote")
 
 	def _get_domain(self):
 		self.ensure_one()
@@ -40,6 +41,9 @@ class ManualLotTraceabilityWizard(models.TransientModel):
 			)
 		if self.product_id:
 			domain.append(("product_id", "=", self.product_id.id))
+		lot_value = (self.lot_number or "").strip()
+		if lot_value:
+			domain.append(("manual_lot", "ilike", lot_value))
 		return domain
 
 	def action_open_report(self):

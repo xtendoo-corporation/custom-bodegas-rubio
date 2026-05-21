@@ -1,0 +1,32 @@
+# Copyright 2025 Bodegas Rubio
+# License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0)
+
+from odoo import api, fields, models
+
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    tax_breakdown_display = fields.Char(
+        string='Desglose impuestos',
+        compute='_compute_tax_breakdown_display',
+        help='Importe de cada impuesto aplicado en la linea.',
+    )
+
+    @api.depends('tax_id', 'price_unit', 'product_uom_qty', 'discount', 'currency_id', 'product_id', 'order_id.partner_id')
+    def _compute_tax_breakdown_display(self):
+        for line in self:
+            parts = []
+            partner = line.order_id.partner_id
+            for tax in line.tax_id:
+                taxes_res = tax.compute_all(
+                    line.price_unit * (1 - (line.discount or 0.0) / 100.0),
+                    currency=line.currency_id,
+                    quantity=line.product_uom_qty,
+                    product=line.product_id,
+                    partner=partner,
+                )
+                amount = sum(t.get('amount', 0.0) for t in taxes_res.get('taxes', []))
+                parts.append(f"{tax.display_name}: {amount:.4f}")
+            line.tax_breakdown_display = ' | '.join(parts)
+

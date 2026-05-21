@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2025 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <template id="report_invoice_document_tax_breakdown" inherit_id="account.report_invoice_document">
+        <xpath expr="//th[@name='th_taxes']" position="after">
+            <th name="th_tax_breakdown" class="text-end">
+                <span>Desglose impuestos</span>
+            </th>
+        </xpath>
+
+        <xpath expr="//td[@name='td_taxes']" position="after">
+            <td name="td_tax_breakdown" class="text-end">
+                <span t-esc="line.tax_breakdown_display"/>
+            </td>
+        </xpath>
+    </template>
+</odoo>
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2025 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <record id="view_purchase_order_form_tax_breakdown" model="ir.ui.view">
+        <field name="name">purchase.order.form.tax.breakdown</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='order_line']/list//field[@name='taxes_id']" position="after">
+                <field name="tax_breakdown_display" string="Desglose impuestos"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

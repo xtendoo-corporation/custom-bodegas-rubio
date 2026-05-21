@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2025 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <record id="view_move_form_tax_breakdown" model="ir.ui.view">
+        <field name="name">account.move.form.tax.breakdown</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']/list//field[@name='tax_ids']" position="after">
+                <field name="tax_breakdown_display" string="Desglose impuestos"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
+

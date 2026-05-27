@@ -20,5 +20,8 @@ Este modulo crea formatos de impresion para `sale.order`:
 
 - `sale`
 - `rubio_product_manual_lote`
-- `rubio_account_tax_line_breakdown`
+
+Integracion opcional:
+
+- `rubio_account_tax_line_breakdown` (si esta instalado y compatible, se mostrara su columna de desglose en los formatos valorados)
 

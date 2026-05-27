@@ -66,7 +66,7 @@
             </t>
         </xpath>
 
-        <xpath expr="//t[@t-if=&quot;doc.partner_shipping_id == doc.partner_invoice_id                              and doc.partner_invoice_id != doc.partner_id                              or doc.partner_shipping_id != doc.partner_invoice_id&quot;]" position="replace">
+        <xpath expr="//t[@t-set='information_block']" position="replace">
             <t t-if="is_albaran_valorado_entrega or is_albaran_sin_valorar_entrega">
                 <t t-set="information_block">
                     <strong>Direccion de entrega</strong>
@@ -128,9 +128,6 @@
         <xpath expr="//th[@name='th_taxes']" position="attributes">
             <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
         </xpath>
-        <xpath expr="//th[@name='th_tax_breakdown']" position="attributes">
-            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
-        </xpath>
         <xpath expr="//th[@name='th_subtotal']" position="attributes">
             <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
         </xpath>
@@ -139,9 +136,6 @@
             <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
         </xpath>
         <xpath expr="//td[@name='td_taxes']" position="attributes">
-            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
-        </xpath>
-        <xpath expr="//td[@name='td_tax_breakdown']" position="attributes">
             <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
         </xpath>
         <xpath expr="//td[@name='td_subtotal']" position="attributes">

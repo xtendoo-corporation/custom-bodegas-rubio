@@ -8,7 +8,6 @@
     'depends': [
         'sale',
         'rubio_product_manual_lote',
-        'rubio_account_tax_line_breakdown',
     ],
     'data': [
         'report/stock_picking_albaran_valorado_report.xml',

@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright 2026 Bodegas Rubio -->
+<!-- License LGPL-3.0 or later (https://www.gnu.org/licenses/lgpl-3.0) -->
+<odoo>
+    <record id="action_report_saleorder_albaran_valorado" model="ir.actions.report">
+        <field name="name">Albaran valorado</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_valorado</field>
+        <field name="report_file">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_valorado</field>
+        <field name="print_report_name">'Albaran valorado - %s - %s' % (object.partner_id.name or '', object.name)</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_saleorder_albaran_sin_valorar" model="ir.actions.report">
+        <field name="name">Albaran sin valorar</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_sin_valorar</field>
+        <field name="report_file">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_sin_valorar</field>
+        <field name="print_report_name">'Albaran sin valorar - %s - %s' % (object.partner_id.name or '', object.name)</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_saleorder_albaran_valorado_entrega" model="ir.actions.report">
+        <field name="name">Albaran valorado (direccion entrega)</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_valorado_entrega</field>
+        <field name="report_file">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_valorado_entrega</field>
+        <field name="print_report_name">'Albaran valorado entrega - %s - %s' % (object.partner_id.name or '', object.name)</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <record id="action_report_saleorder_albaran_sin_valorar_entrega" model="ir.actions.report">
+        <field name="name">Albaran sin valorar (direccion entrega)</field>
+        <field name="model">sale.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_sin_valorar_entrega</field>
+        <field name="report_file">rubio_stock_picking_albaran_valorado.report_saleorder_albaran_sin_valorar_entrega</field>
+        <field name="print_report_name">'Albaran sin valorar entrega - %s - %s' % (object.partner_id.name or '', object.name)</field>
+        <field name="binding_model_id" ref="sale.model_sale_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_saleorder_albaran_valorado_document" inherit_id="sale.report_saleorder_document">
+        <xpath expr="//t[@t-set='address']" position="replace">
+            <t t-set="address">
+                <t t-if="is_albaran_valorado_entrega or is_albaran_sin_valorar_entrega">
+                    <div t-field="doc.partner_shipping_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                    <p t-if="doc.partner_shipping_id.vat">
+                        <t t-if="doc.company_id.account_fiscal_country_id.vat_label" t-out="doc.company_id.account_fiscal_country_id.vat_label"/>
+                        <t t-else="">Tax ID</t>: <span t-field="doc.partner_shipping_id.vat"/>
+                    </p>
+                </t>
+                <t t-else="">
+                    <div t-field="doc.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}'/>
+                    <p t-if="doc.partner_id.vat">
+                        <t t-if="doc.company_id.account_fiscal_country_id.vat_label" t-out="doc.company_id.account_fiscal_country_id.vat_label"/>
+                        <t t-else="">Tax ID</t>: <span t-field="doc.partner_id.vat"/>
+                    </p>
+                </t>
+            </t>
+        </xpath>
+
+        <xpath expr="//t[@t-if=&quot;doc.partner_shipping_id == doc.partner_invoice_id                              and doc.partner_invoice_id != doc.partner_id                              or doc.partner_shipping_id != doc.partner_invoice_id&quot;]" position="replace">
+            <t t-if="is_albaran_valorado_entrega or is_albaran_sin_valorar_entrega">
+                <t t-set="information_block">
+                    <strong>Direccion de entrega</strong>
+                    <div t-field="doc.partner_shipping_id" t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                </t>
+            </t>
+            <t t-if="not (is_albaran_valorado_entrega or is_albaran_sin_valorar_entrega) and (doc.partner_shipping_id == doc.partner_invoice_id and doc.partner_invoice_id != doc.partner_id or doc.partner_shipping_id != doc.partner_invoice_id)">
+                <t t-set="information_block">
+                    <strong>
+                        <t t-if="doc.partner_shipping_id == doc.partner_invoice_id">
+                            Invoicing and Shipping Address
+                        </t>
+                        <t t-else="">
+                            Invoicing Address
+                        </t>
+                    </strong>
+                    <div t-field="doc.partner_invoice_id" t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                    <t t-if="doc.partner_shipping_id != doc.partner_invoice_id">
+                        <strong class="d-block mt-3">Shipping Address</strong>
+                        <div t-field="doc.partner_shipping_id" t-options='{"widget": "contact", "fields": ["address", "name", "phone"], "no_marker": True, "phone_icons": True}'/>
+                    </t>
+                </t>
+            </t>
+        </xpath>
+
+        <xpath expr="//t[@t-set='layout_document_title']" position="replace">
+            <t t-set="layout_document_title">
+                <t t-if="is_albaran_valorado">
+                    <span>Albaran valorado # </span>
+                    <span t-field="doc.name"/>
+                </t>
+                <t t-elif="is_albaran_sin_valorar">
+                    <span>Albaran sin valorar # </span>
+                    <span t-field="doc.name"/>
+                </t>
+                <t t-elif="is_albaran_valorado_entrega">
+                    <span>Albaran valorado (direccion entrega) # </span>
+                    <span t-field="doc.name"/>
+                </t>
+                <t t-elif="is_albaran_sin_valorar_entrega">
+                    <span>Albaran sin valorar (direccion entrega) # </span>
+                    <span t-field="doc.name"/>
+                </t>
+                <t t-else="">
+                    <span t-if="is_proforma">Pro-Forma Invoice # </span>
+                    <span t-elif="doc.state in ['draft','sent']">Quotation # </span>
+                    <span t-else="">Order # </span>
+                    <span t-field="doc.name">SO0000</span>
+                </t>
+            </t>
+        </xpath>
+
+        <xpath expr="//th[@name='th_priceunit']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//th[@name='th_discount']" position="attributes">
+            <attribute name="t-if">display_discount and not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//th[@name='th_taxes']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//th[@name='th_tax_breakdown']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//th[@name='th_subtotal']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+
+        <xpath expr="//td[@name='td_priceunit']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//td[@name='td_taxes']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//td[@name='td_tax_breakdown']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//td[@name='td_subtotal']" position="attributes">
+            <attribute name="t-if">not line.is_downpayment and not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+
+        <xpath expr="//tbody[hasclass('sale_tbody')]/t/t/tr[hasclass('is-subtotal') and hasclass('text-end')]" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+        <xpath expr="//div[@name='so_total_summary']" position="attributes">
+            <attribute name="t-if">not (is_albaran_sin_valorar or is_albaran_sin_valorar_entrega)</attribute>
+        </xpath>
+    </template>
+
+    <template id="report_saleorder_albaran_valorado_raw">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="is_albaran_valorado" t-value="True"/>
+                <t t-call="sale.report_saleorder_document" t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_saleorder_albaran_valorado">
+        <t t-call="rubio_stock_picking_albaran_valorado.report_saleorder_albaran_valorado_raw"/>
+    </template>
+
+    <template id="report_saleorder_albaran_sin_valorar_raw">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="is_albaran_sin_valorar" t-value="True"/>
+                <t t-call="sale.report_saleorder_document" t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_saleorder_albaran_sin_valorar">
+        <t t-call="rubio_stock_picking_albaran_valorado.report_saleorder_albaran_sin_valorar_raw"/>
+    </template>
+
+    <template id="report_saleorder_albaran_valorado_entrega_raw">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="is_albaran_valorado_entrega" t-value="True"/>
+                <t t-call="sale.report_saleorder_document" t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_saleorder_albaran_valorado_entrega">
+        <t t-call="rubio_stock_picking_albaran_valorado.report_saleorder_albaran_valorado_entrega_raw"/>
+    </template>
+
+    <template id="report_saleorder_albaran_sin_valorar_entrega_raw">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-set="is_albaran_sin_valorar_entrega" t-value="True"/>
+                <t t-call="sale.report_saleorder_document" t-lang="doc.partner_id.lang"/>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_saleorder_albaran_sin_valorar_entrega">
+        <t t-call="rubio_stock_picking_albaran_valorado.report_saleorder_albaran_sin_valorar_entrega_raw"/>
+    </template>
+</odoo>
+

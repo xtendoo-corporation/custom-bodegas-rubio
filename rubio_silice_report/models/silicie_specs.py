@@ -112,12 +112,6 @@ MOVEMENT_TYPES = [
     ('A09', 'Salida a consumo - Canarias, Ceuta o Melilla'),
     ('A10', 'Salida en régimen suspensivo - UE'),
     ('A11', 'Salida en régimen suspensivo - exportación'),
-    ('A12', 'Salida para entrega exenta'),
-    ('A13', 'Salida para uso de las fuerzas armadas de un Estado miembro'),
-    ('A14', 'Salida para venta a bordo'),
-    ('A15', 'Otras salidas'),
-    ('A16', 'Salida para destrucción'),
-    ('A17', 'Salida a otro depósito fiscal del mismo titular'),
 ]
 
 UNIT_MEASURES = [

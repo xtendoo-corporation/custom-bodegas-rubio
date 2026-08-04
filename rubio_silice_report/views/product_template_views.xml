@@ -9,7 +9,6 @@
                 <page string="SILICIE" name="silicie_page">
                     <group name="silicie_group">
                         <group>
-                            <field name="silicie_codigo_producto"/>
                             <field name="silicie_unidad_medida"/>
                             <field name="silicie_graduacion"/>
                             <field name="silicie_descripcion_articulo"/>

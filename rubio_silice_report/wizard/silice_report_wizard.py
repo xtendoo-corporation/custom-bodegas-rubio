@@ -162,16 +162,22 @@ class SiliceReportWizard(models.TransientModel):
         if not product.silicie_codigo_producto:
             return None
 
+        unidad_medida = product.silicie_unidad_medida or 'LTR'
+        if unidad_medida == 'LTS':
+            unidad_medida = 'LTR'
+
         return {
             'codigo_nc': product.silicie_codigo_nc or '',
-            'unidad_medida': product.silicie_unidad_medida or 'LTS',  # Por defecto Litros
+            'unidad_medida': unidad_medida,
             'graduacion': str(product.silicie_graduacion) if product.silicie_graduacion else '',
         }
 
     def _build_csv_rows(self, pickings):
         """Construye las filas de datos para el CSV SILICIE (solo productos SILICIE)."""
         ICP = self.env['ir.config_parameter'].sudo()
-        default_um = ICP.get_param('rubio_silice_report.silicie_default_um', 'LTS')
+        default_um = ICP.get_param('rubio_silice_report.silicie_default_um', 'LTR')
+        if default_um == 'LTS':
+            default_um = 'LTR'
 
         fecha_presentacion = datetime.now()
         rows_data = []
@@ -255,7 +261,6 @@ class SiliceReportWizard(models.TransientModel):
                     'cantidad': cantidad,
                     'codigo_epigrafe': 'A0',
                     'capacidad_envase': capacidad_envase,
-                    'densidad': '',
                     'alcohol_puro': round((cantidad * float(product_mapping.get('graduacion', 0))) / 100, 2) if product_mapping.get('graduacion', '') else 0,
                     'indicador_marcas_fiscales': '',
                     'observaciones': picking.observaciones_entrega or '',

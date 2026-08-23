@@ -144,7 +144,7 @@ class TestSiliceReportWizard(TransactionCase):
             'rubio_silice_report.silicie_csv_profile', 'IESH1CSV'
         )
         self.env['ir.config_parameter'].sudo().set_param(
-            'rubio_silice_report.silicie_default_um', 'LTS'
+            'rubio_silice_report.silicie_default_um', 'LTR'
         )
         self.env['ir.config_parameter'].sudo().set_param(
             'rubio_silice_report.silice_field_name', 'x_silice_number'
@@ -164,7 +164,7 @@ class TestSiliceReportWizard(TransactionCase):
             str(self.product.id): {
                 'codigo_producto': 'PROD001',
                 'tipo_producto': 'HI',
-                'unidad_medida': 'LTS',
+                'unidad_medida': 'LTR',
                 'densidad': 0.85,
                 'temperatura': 15.0,
             }

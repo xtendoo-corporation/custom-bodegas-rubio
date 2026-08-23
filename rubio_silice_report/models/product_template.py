@@ -45,9 +45,9 @@ class ProductTemplate(models.Model):
 
     @api.depends('_silicie_unidad_medida_stored')
     def _compute_silicie_unidad_medida(self):
-        """Siempre devolver LTS si está vacío."""
+        """Siempre devolver LTR si está vacío."""
         for record in self:
-            record.silicie_unidad_medida = record._silicie_unidad_medida_stored or 'LTS'
+            record.silicie_unidad_medida = record._silicie_unidad_medida_stored or 'LTR'
 
     def _inverse_silicie_unidad_medida(self):
         """Guardar el valor cuando el usuario lo cambia."""
@@ -59,10 +59,10 @@ class ProductTemplate(models.Model):
         """Forzar valores predeterminados para productos nuevos."""
         res = super().default_get(fields_list)
 
-        # Forzar LTS para productos nuevos
+        # Forzar LTR para productos nuevos
         if 'silicie_unidad_medida' in fields_list or '_silicie_unidad_medida_stored' in fields_list:
-            res['_silicie_unidad_medida_stored'] = 'LTS'
-            res['silicie_unidad_medida'] = 'LTS'
+            res['_silicie_unidad_medida_stored'] = 'LTR'
+            res['silicie_unidad_medida'] = 'LTR'
 
         return res
 

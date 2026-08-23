@@ -166,7 +166,7 @@ Ir a: **Ajustes → Inventario → SILICIE 2.0**
 - **Campo Número de Sílice**: Nombre del campo en stock.picking que contiene el número de sílice (por defecto: `x_silice_number`)
 
 - **Unidad de Medida por Defecto**: Unidad SILICIE para cantidades
-  - `LTS` - Litros (por defecto)
+  - `LTR` - Litros (por defecto)
   - `KGS` - Kilogramos
   - `UNI` - Unidades
   - `CAJ` - Cajas
@@ -192,7 +192,7 @@ El mapeo de productos se configura en formato JSON en el campo **Mapeo de Produc
   "PRODUCT_ID": {
     "codigo_producto": "CODIGO_SILICIE",
     "tipo_producto": "TIPO",
-    "unidad_medida": "LTS",
+    "unidad_medida": "LTR",
     "campo_especifico_1": "valor",
     "campo_especifico_2": "valor"
   }
@@ -206,14 +206,14 @@ El mapeo de productos se configura en formato JSON en el campo **Mapeo de Produc
   "123": {
     "codigo_producto": "GASOIL_A",
     "tipo_producto": "HI",
-    "unidad_medida": "LTS",
+    "unidad_medida": "LTR",
     "densidad": 0.85,
     "temperatura": 15.0
   },
   "124": {
     "codigo_producto": "GASOLINA_95",
     "tipo_producto": "HI",
-    "unidad_medida": "LTS",
+    "unidad_medida": "LTR",
     "densidad": 0.75,
     "temperatura": 15.0
   }
@@ -242,7 +242,7 @@ El mapeo de productos se configura en formato JSON en el campo **Mapeo de Produc
     "codigo_producto": "VINO_TINTO",
     "tipo_producto": "AL",
     "graduacion": 13.5,
-    "unidad_medida": "LTS"
+    "unidad_medida": "LTR"
   }
 }
 ```
@@ -349,16 +349,15 @@ El CSV generado sigue **exactamente** el orden de campos exigido por el perfil S
 | 8 | codigo_producto | Código del producto | Sí |
 | 9 | tipo_producto | Tipo de producto | Sí |
 | 10 | cantidad | Cantidad | Sí |
-| 11 | unidad_medida | Unidad de medida (LTS, KGS...) | Sí |
-| 12 | densidad | Densidad (solo hidrocarburos) | No |
-| 13 | temperatura | Temperatura (solo hidrocarburos) | No |
-| 14 | destino_nif | NIF del destinatario | No |
-| 15 | destino_nombre | Nombre del destinatario | No |
-| 16 | destino_direccion | Dirección del destinatario | No |
-| 17 | destino_pais | País del destinatario (ISO 2) | No |
-| 18 | num_justificante | Número de justificante | No |
-| 19 | tipo_justificante | Tipo de justificante | No |
-| 20 | observaciones | Observaciones | No |
+| 11 | unidad_medida | Unidad de medida (LTR, KGS...) | Sí |
+| 12 | temperatura | Temperatura (solo hidrocarburos) | No |
+| 13 | destino_nif | NIF del destinatario | No |
+| 14 | destino_nombre | Nombre del destinatario | No |
+| 15 | destino_direccion | Dirección del destinatario | No |
+| 16 | destino_pais | País del destinatario (ISO 2) | No |
+| 17 | num_justificante | Número de justificante | No |
+| 18 | tipo_justificante | Tipo de justificante | No |
+| 19 | observaciones | Observaciones | No |
 
 **Nota**: Los campos específicos varían según el perfil (IESH1CSV, IEST1CSV, IESA1CSV).
 
@@ -374,7 +373,7 @@ Ajustes → Inventario → SILICIE 2.0:
 - Perfil CSV: IESH1CSV
 - Zona Horaria: Europe/Madrid
 - Campo Sílice: x_silice_number
-- UM por defecto: LTS
+- UM por defecto: LTR
 - Tipo Movimiento: A08
 ```
 
@@ -385,12 +384,12 @@ Ajustes → Inventario → SILICIE 2.0:
   "45": {
     "codigo_producto": "GASOIL_A",
     "tipo_producto": "HI",
-    "unidad_medida": "LTS",
+    "unidad_medida": "LTR",
     "densidad": 0.845,
     "temperatura": 15.0
   },
   "46": {
     "codigo_producto": "GASOLINA_95",
     "tipo_producto": "HI",
-    "unidad_medida": "LTS",
+    "unidad_medida": "LTR",
 

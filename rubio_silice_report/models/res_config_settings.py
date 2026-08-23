@@ -35,7 +35,7 @@ class ResConfigSettings(models.TransientModel):
         string='Unidad de Medida por Defecto',
         help='Unidad de medida estandarizada SILICIE para cantidades',
         config_parameter='rubio_silice_report.silicie_default_um',
-        default='LTS',
+        default='LTR',
     )
 
     silicie_default_movement_type = fields.Selection(

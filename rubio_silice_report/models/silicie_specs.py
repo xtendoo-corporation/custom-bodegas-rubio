@@ -24,7 +24,6 @@ DATE_FORMAT = '%d/%m/%Y'
 CSV_FIELDS = [
     'referencia_interna',
     'numero_asiento_previo',
-    'numero_asiento_previo_reintroduccion',
     'fecha_movimiento',
     'fecha_registro_contable',
     'tipo_movimiento',
@@ -42,7 +41,6 @@ CSV_FIELDS = [
     'unidad_medida',
     'producto',
     'descripcion_producto',
-    'densidad',
     'graduacion',
     'alcohol_puro',
     'tipo_envase',
@@ -71,7 +69,6 @@ FLOAT_FIELDS = ['graduacion', 'cantidad']
 CSV_HEADERS = {
     'referencia_interna': 'Numero Referencia Interna',
     'numero_asiento_previo': 'Numero Asiento Previo',  # NUEVO
-    'numero_asiento_previo_reintroduccion': 'Numero Asiento Previo Reintroduccion',  # NUEVO
     'fecha_movimiento': 'Fecha Movimiento',
     'fecha_registro_contable': 'Fecha Registro Contable',
     'tipo_justificante': 'Tipo Documento Identificativo',
@@ -91,7 +88,6 @@ CSV_HEADERS = {
     'unidad_medida': 'Unidad Medida',
     'producto': 'Producto',
     'descripcion_producto': 'Descripcion Producto',
-    'densidad': 'Densidad',
     'graduacion': 'Graduacion',
     'alcohol_puro': 'Alcohol Puro',
     'tipo_envase': 'Tipo Envase',
@@ -115,7 +111,8 @@ MOVEMENT_TYPES = [
 ]
 
 UNIT_MEASURES = [
-    ('LTS', 'Litros'), ('KGS', 'Kilogramos'), ('UNI', 'Unidades'),
+    ('LTR', 'Litros'), ('LTS', 'Litros (valor anterior)'),
+    ('KGS', 'Kilogramos'), ('UNI', 'Unidades'),
     ('CAJ', 'Cajas'), ('HL', 'Hectolitros'), ('HPA', 'Hectolitros de alcohol puro'),
 ]
 

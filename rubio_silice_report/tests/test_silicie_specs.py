@@ -66,7 +66,7 @@ class TestSilicieSpecs(TransactionCase):
     def test_validate_unit_measure(self):
         """Test validación de unidad de medida."""
         # Unidades válidas
-        self.assertTrue(silicie_specs.validate_unit_measure('LTS'))
+        self.assertTrue(silicie_specs.validate_unit_measure('LTR'))
         self.assertTrue(silicie_specs.validate_unit_measure('KGS'))
 
         # Unidad inválida
@@ -122,7 +122,7 @@ class TestSilicieSpecs(TransactionCase):
             'codigo_producto': 'PROD001',
             'tipo_producto': 'HI',
             'cantidad': 1000.500,
-            'unidad_medida': 'LTS',
+            'unidad_medida': 'LTR',
         }
 
         csv_row = silicie_specs.build_csv_row(row_data, 'IESH1CSV')
@@ -157,7 +157,7 @@ class TestSilicieSpecs(TransactionCase):
             'codigo_producto': 'PROD001',
             'tipo_producto': 'HI',
             'cantidad': 1000.500,
-            'unidad_medida': 'LTS',
+            'unidad_medida': 'LTR',
             'densidad': 0.8500,
             'temperatura': 15.50,
             'destino_nif': 'B12345678',

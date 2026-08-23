@@ -15,7 +15,7 @@ row_data = {
     'codigo_producto': 'PROD001',
     'graduacion': '40',
     'cantidad': '100.000',
-    'unidad_medida': 'LTS',
+    'unidad_medida': 'LTR',
     'destino_nif': 'B12345678',
     'destino_nombre': 'Cliente S.A.',
     'destino_direccion': 'Calle Ejemplo 1',

@@ -158,10 +158,6 @@ class SiliceReportWizard(models.TransientModel):
         """Obtiene los datos SILICIE del producto directamente desde sus campos."""
         product = self.env['product.product'].browse(product_id)
 
-        # Si no tiene configuración SILICIE, retornar None
-        if not product.silicie_codigo_producto:
-            return None
-
         unidad_medida = product.silicie_unidad_medida or 'LTR'
         if unidad_medida == 'LTS':
             unidad_medida = 'LTR'
@@ -173,7 +169,7 @@ class SiliceReportWizard(models.TransientModel):
         }
 
     def _build_csv_rows(self, pickings):
-        """Construye las filas de datos para el CSV SILICIE (solo productos SILICIE)."""
+        """Construye las filas de datos para el CSV SILICIE."""
         ICP = self.env['ir.config_parameter'].sudo()
         default_um = ICP.get_param('rubio_silice_report.silicie_default_um', 'LTR')
         if default_um == 'LTS':
@@ -182,7 +178,7 @@ class SiliceReportWizard(models.TransientModel):
         fecha_presentacion = datetime.now()
         rows_data = []
         missing_products = set()
-        silicie_count = 0
+        exported_line_count = 0
 
         for picking in pickings:
             global_line_counter = 0  # Contador global para todas las líneas
@@ -198,9 +194,7 @@ class SiliceReportWizard(models.TransientModel):
 
             for move_line in picking.move_line_ids.filtered(lambda ml: ml.quantity > 0):
                 product = move_line.product_id
-                if not product.silicie_codigo_producto:
-                    continue  # Excluir productos que no son SILICIE
-                silicie_count += 1
+                exported_line_count += 1
                 product_mapping = self._get_product_mapping(product.id)
                 global_line_counter += 1
 
@@ -281,9 +275,10 @@ class SiliceReportWizard(models.TransientModel):
                     'line': '1',
                 })
 
-        if silicie_count == 0:
+        if exported_line_count == 0:
             raise UserError(_(
-                'No hay productos SILICIE para exportar en el rango de fechas seleccionado.'
+                'No hay líneas de producto con cantidades realizadas para exportar '
+                'en el rango de fechas seleccionado.'
             ))
         return rows_data
 
@@ -325,7 +320,6 @@ class SiliceReportWizard(models.TransientModel):
                 'No se generaron datos para exportar.\n'
                 'Verifique que los pickings tengan:\n'
                 '- Número de sílice configurado\n'
-                '- Productos con mapeo SILICIE\n'
                 '- Cantidades realizadas > 0'
             ))
 

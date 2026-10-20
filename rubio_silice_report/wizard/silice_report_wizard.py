@@ -194,6 +194,8 @@ class SiliceReportWizard(models.TransientModel):
 
             for move_line in picking.move_line_ids.filtered(lambda ml: ml.quantity > 0):
                 product = move_line.product_id
+                if not product.product_tmpl_id.silicie_incluir_informe:
+                    continue
                 exported_line_count += 1
                 product_mapping = self._get_product_mapping(product.id)
                 global_line_counter += 1

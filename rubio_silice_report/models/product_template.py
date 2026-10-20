@@ -40,7 +40,13 @@ class ProductTemplate(models.Model):
 
     silicie_descripcion_articulo = fields.Char(
         string='Descripción Artículo',
-        help='Descripción manual del artículo para exportar en el CSV SILICIE.'
+        help='Descripción manual del artículo para exportar en el CSV SILICIE.',
+    )
+
+    silicie_incluir_informe = fields.Boolean(
+        string='Incluir en informe SILICIE',
+        help='Si está marcado, este producto se incluirá en la exportación del informe SILICIE.',
+        default=False,
     )
 
     @api.depends('_silicie_unidad_medida_stored')
